@@ -8,11 +8,11 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const ADMIN_PASSWORD = "detailing2026";
 
 const SERVICES = [
-  { id: "interior", name: "Interior Only", duration: "1.5 hrs" },
-  { id: "exterior-basic", name: "Exterior Basic", duration: "1 hr" },
-  { id: "exterior-premium", name: "Exterior Premium", duration: "1.5 hrs" },
-  { id: "combo-basic", name: "Interior + Exterior Basic", duration: "2.5 hrs" },
-  { id: "combo-premium", name: "Interior + Exterior Premium", duration: "3 hrs" },
+  { id: "interior", name: "Interior Only", duration: "1.5 hrs", prices: { sedan: 80, suv: 95 } },
+  { id: "exterior-basic", name: "Exterior Basic", duration: "1 hr", prices: { sedan: 45, suv: 45 } },
+  { id: "exterior-premium", name: "Exterior Premium", duration: "1.5 hrs", prices: { sedan: 75, suv: 95 } },
+  { id: "combo-basic", name: "Interior + Exterior Basic", duration: "2.5 hrs", prices: { sedan: 110, suv: 120 } },
+  { id: "combo-premium", name: "Interior + Exterior Premium", duration: "3 hrs", prices: { sedan: 135, suv: 155 } },
 ];
 
 const WEEKLY_SLOTS = [
@@ -90,7 +90,7 @@ function ClientView() {
   const slots = getAvailableSlots();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
-    client_name: "", client_email: "", client_phone: "",
+    client_name: "", client_email: "", client_phone: "", vehicle_type: "",
     service_type: "", booking_date: "", booking_time: "", notes: "",
   });
   const [loading, setLoading] = useState(false);
@@ -139,7 +139,7 @@ function ClientView() {
           <strong>{form.booking_time}</strong>.
         </p>
         <p style={s.successSub}>A confirmation will be sent to {form.client_email}.</p>
-        <button style={s.btnPrimary} onClick={() => { setDone(false); setStep(1); setForm({ client_name:"",client_email:"",client_phone:"",service_type:"",booking_date:"",booking_time:"",notes:"" }); }}>
+        <button style={s.btnPrimary} onClick={() => { setDone(false); setStep(1); setForm({ client_name:"",client_email:"",client_phone:"",vehicle_type:"",service_type:"",booking_date:"",booking_time:"",notes:"" }); }}>
           Book another
         </button>
       </div>
@@ -174,9 +174,23 @@ function ClientView() {
             <label style={s.label}>Phone</label>
             <input style={s.input} type="tel" value={form.client_phone} onChange={e => set("client_phone", e.target.value)} placeholder="(555) 000-0000" />
           </div>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Vehicle type</label>
+            <div style={s.vehicleToggle}>
+              {["sedan", "suv"].map(v => (
+                <button
+                  key={v}
+                  style={{ ...s.vehicleBtn, ...(form.vehicle_type === v ? s.vehicleBtnActive : {}) }}
+                  onClick={() => set("vehicle_type", v)}
+                >
+                  {v === "sedan" ? "Sedan" : "SUV / Truck"}
+                </button>
+              ))}
+            </div>
+          </div>
           <button
-            style={{ ...s.btnPrimary, ...((!form.client_name || !form.client_email || !form.client_phone) ? s.btnDisabled : {}) }}
-            disabled={!form.client_name || !form.client_email || !form.client_phone}
+            style={{ ...s.btnPrimary, ...((!form.client_name || !form.client_email || !form.client_phone || !form.vehicle_type) ? s.btnDisabled : {}) }}
+            disabled={!form.client_name || !form.client_email || !form.client_phone || !form.vehicle_type}
             onClick={() => setStep(2)}
           >
             Continue →
@@ -195,7 +209,10 @@ function ClientView() {
                 onClick={() => set("service_type", svc.name)}
               >
                 <span style={s.serviceName}>{svc.name}</span>
-                <span style={s.serviceDuration}>{svc.duration}</span>
+                <div style={s.serviceMeta}>
+                  <span style={s.servicePrice}>${svc.prices[form.vehicle_type]}</span>
+                  <span style={s.serviceDuration}>{svc.duration}</span>
+                </div>
               </button>
             ))}
           </div>
@@ -255,7 +272,9 @@ function ClientView() {
             <Row label="Name" value={form.client_name} />
             <Row label="Email" value={form.client_email} />
             <Row label="Phone" value={form.client_phone} />
+            <Row label="Vehicle" value={form.vehicle_type === "sedan" ? "Sedan" : "SUV / Truck"} />
             <Row label="Service" value={form.service_type} />
+            <Row label="Price" value={`$${SERVICES.find(s => s.name === form.service_type)?.prices[form.vehicle_type] ?? "—"}`} />
             <Row label="Date" value={availableSlots.find(sl => sl.date === form.booking_date && sl.time === form.booking_time)?.displayDate || form.booking_date} />
             <Row label="Time" value={form.booking_time} />
             {form.notes && <Row label="Notes" value={form.notes} />}
@@ -442,7 +461,12 @@ const s = {
   serviceCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", border: "1.5px solid #2A2A2A", borderRadius: 8, background: "#141414", cursor: "pointer", fontFamily: "inherit", textAlign: "left" },
   serviceCardActive: { border: "1.5px solid #F97316", background: "#1C1007" },
   serviceName: { fontSize: 14, fontWeight: 600, color: "#F9FAFB" },
-  serviceDuration: { fontSize: 13, color: "#9CA3AF", background: "#252525", padding: "2px 10px", borderRadius: 20 },
+  serviceMeta: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 },
+  servicePrice: { fontSize: 15, fontWeight: 700, color: "#F97316" },
+  serviceDuration: { fontSize: 12, color: "#9CA3AF" },
+  vehicleToggle: { display: "flex", gap: 8 },
+  vehicleBtn: { flex: 1, padding: "10px 16px", border: "1.5px solid #2A2A2A", borderRadius: 8, background: "#141414", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#9CA3AF", fontFamily: "inherit" },
+  vehicleBtnActive: { border: "1.5px solid #F97316", background: "#1C1007", color: "#F97316" },
   slotGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 8 },
   slotCard: { padding: "12px 14px", border: "1.5px solid #2A2A2A", borderRadius: 8, background: "#141414", cursor: "pointer", textAlign: "left", fontFamily: "inherit", display: "flex", flexDirection: "column", gap: 4 },
   slotCardActive: { border: "1.5px solid #F97316", background: "#1C1007" },
