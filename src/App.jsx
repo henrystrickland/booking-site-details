@@ -59,7 +59,7 @@ export default function App() {
       <header style={s.header}>
         <div style={s.logo}>
           <span style={s.logoMark}>◆</span>
-          <span style={s.logoText}>CDIT Detailing</span>
+          <span style={s.logoText}>C&H Elite Auto Detailing</span>
         </div>
         <nav style={s.nav}>
           <button
@@ -164,11 +164,11 @@ function ClientView() {
           <h2 style={s.sectionTitle}>Your info</h2>
           <div style={s.fieldGroup}>
             <label style={s.label}>Full name</label>
-            <input style={s.input} value={form.client_name} onChange={e => set("client_name", e.target.value)} placeholder="Henry Strickland" />
+            <input style={s.input} value={form.client_name} onChange={e => set("client_name", e.target.value)} placeholder="Jane Smith" />
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Email</label>
-            <input style={s.input} type="email" value={form.client_email} onChange={e => set("client_email", e.target.value)} placeholder="henry@example.com" />
+            <input style={s.input} type="email" value={form.client_email} onChange={e => set("client_email", e.target.value)} placeholder="you@example.com" />
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Phone</label>
