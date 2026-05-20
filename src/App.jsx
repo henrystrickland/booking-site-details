@@ -309,7 +309,7 @@ function AdminLogin({ onAuth }) {
     else { setErr(true); setPw(""); }
   };
   return (
-    <div style={{ ...s.card, maxWidth: 360, margin: "0 auto" }}>
+    <div style={{ ...s.card, maxWidth: 360, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
       <h2 style={s.sectionTitle}>Admin login</h2>
       <div style={s.fieldGroup}>
         <label style={s.label}>Password</label>
