@@ -78,6 +78,11 @@ function NavTabs({ view, setView }) {
 export default function App() {
   const [view, setView] = useState("client");
   const [adminAuthed, setAdminAuthed] = useState(false);
+  const [booked, setBooked] = useState(false);
+  const [bookedForm, setBookedForm] = useState(null);
+
+  const handleBooked = (form) => { setBooked(true); setBookedForm(form); };
+  const handleReset = () => { setBooked(false); setBookedForm(null); };
 
   return (
     <div style={s.app}>
@@ -90,14 +95,15 @@ export default function App() {
           </div>
         </div>
         {view !== "admin" ? (
-          <NavTabs view={view} setView={setView} />
+          <NavTabs view={view} setView={(v) => { setView(v); if (v !== "client") handleReset(); }} />
         ) : (
           <button style={s.backBtn} onClick={() => setView("client")}>← Back</button>
         )}
       </header>
 
       <main style={s.main}>
-        {view === "client" && (
+        {view === "client" && booked && <SuccessView form={bookedForm} onReset={handleReset} />}
+        {view === "client" && !booked && (
           <div style={s.hero}>
             <div style={s.heroLogoWrap}>
               <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
@@ -124,8 +130,7 @@ export default function App() {
             </div>
           </div>
         )}
-        {view === "client" && <ValueProps />}
-        {view === "client" && (
+          <ValueProps />
           <div style={s.bookingHeader}>
             <div style={s.bookingHeaderTop}>
               <h2 style={s.bookingHeaderTitle}>Book Your Detail</h2>
@@ -133,10 +138,10 @@ export default function App() {
             </div>
             <p style={s.bookingHeaderSub}>Pick your service, choose a time, and we'll come to you.</p>
           </div>
+          <ClientView onBooked={handleBooked} />
+          <ShareBanner />
+          <FloatingReviews />
         )}
-        {view === "client" && <ClientView />}
-        {view === "client" && <ShareBanner />}
-        {view === "client" && <FloatingReviews />}
         {view === "gallery" && <GalleryView />}
         {view === "reviews" && <ReviewsView />}
         {view === "admin" && !adminAuthed && <AdminLogin onAuth={() => setAdminAuthed(true)} />}
@@ -227,7 +232,43 @@ function ShareBanner() {
   );
 }
 
-function ClientView() {
+function SuccessView({ form, onReset }) {
+  const [copied, setCopied] = useState(false);
+  const handleShare = async () => {
+    const data = { title: "C&H Elite Auto Detailing", text: "Check out C&H Elite Auto Detailing — premium mobile detailing in Northern Virginia!", url: window.location.href };
+    if (navigator.share) { try { await navigator.share(data); } catch (_) {} }
+    else { await navigator.clipboard.writeText(`${data.text} ${data.url}`); setCopied(true); setTimeout(() => setCopied(false), 2500); }
+  };
+
+  return (
+    <div style={s.successView}>
+      <div style={s.successIconLarge}>✓</div>
+      <h2 style={s.successTitle}>You're booked!</h2>
+      <p style={s.successBody}>
+        {form.client_name}, we've received your booking for <strong>{form.service_type}</strong> on{" "}
+        <strong>{form.displayDate}</strong> at <strong>{form.booking_time}</strong>.
+      </p>
+      <p style={s.successSub}>We'll be in touch at {form.client_email}.</p>
+      <div style={s.successActions}>
+        <button style={s.btnPrimary} onClick={onReset}>Book another</button>
+        <button style={{ ...s.shareBtn, ...(copied ? s.shareBtnCopied : {}) }} onClick={handleShare}>
+          {copied ? "Link copied!" : (
+            <>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              Recommend Us
+            </>
+          )}
+        </button>
+      </div>
+      <p style={s.successNav}>Or explore: use the tabs above to view our Gallery or leave a Review.</p>
+    </div>
+  );
+}
+
+function ClientView({ onBooked }) {
   const slots = getAvailableSlots();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -236,7 +277,6 @@ function ClientView() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
   const [bookedSlots, setBookedSlots] = useState([]);
 
   useEffect(() => {
@@ -266,26 +306,8 @@ function ClientView() {
     }]);
     setLoading(false);
     if (err) { setError("Something went wrong. Please try again."); return; }
-    setDone(true);
+    onBooked({ ...form, displayDate: slots.find(sl => sl.date === form.booking_date && sl.time === form.booking_time)?.displayDate });
   };
-
-  if (done) {
-    return (
-      <div style={s.card}>
-        <div style={s.successIcon}>✓</div>
-        <h2 style={s.successTitle}>You're booked!</h2>
-        <p style={s.successBody}>
-          {form.client_name}, we've received your booking for <strong>{form.service_type}</strong> on{" "}
-          <strong>{slots.find(sl => sl.date === form.booking_date && sl.time === form.booking_time)?.displayDate}</strong> at{" "}
-          <strong>{form.booking_time}</strong>.
-        </p>
-        <p style={s.successSub}>A confirmation will be sent to {form.client_email}.</p>
-        <button style={s.btnPrimary} onClick={() => { setDone(false); setStep(1); setForm({ client_name:"",client_email:"",client_phone:"",vehicle_type:"",service_type:"",booking_date:"",booking_time:"",notes:"" }); }}>
-          Book another
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div style={s.card}>
@@ -994,11 +1016,15 @@ const s = {
   btnDisabled: { opacity: 0.22, cursor: "not-allowed" },
   errorBox: { background: "#180000", border: "1px solid #380000", color: "#FC8181", padding: "12px 14px", borderRadius: 8, fontSize: 13 },
 
-  // Success
+  // Success page
+  successView: { display: "flex", flexDirection: "column", alignItems: "center", padding: "60px 24px 40px", textAlign: "center" },
+  successIconLarge: { width: 72, height: 72, borderRadius: "50%", background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, marginBottom: 28, color: "#fff", fontWeight: 700 },
   successIcon: { width: 56, height: 56, borderRadius: "50%", background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, margin: "0 auto 20px", color: "#fff", fontWeight: 700 },
-  successTitle: { textAlign: "center", fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: "0 0 12px", letterSpacing: "-0.02em" },
-  successBody: { textAlign: "center", fontSize: 14, color: "#777", margin: "0 0 8px", lineHeight: 1.6 },
-  successSub: { textAlign: "center", fontSize: 13, color: "#3A3A3A", margin: "0 0 24px" },
+  successTitle: { fontSize: 32, fontWeight: 800, color: "#EEEEEE", margin: "0 0 16px", letterSpacing: "-0.03em" },
+  successBody: { fontSize: 15, color: "#777", margin: "0 0 8px", lineHeight: 1.7, maxWidth: 420 },
+  successSub: { fontSize: 13, color: "#3A3A3A", margin: "0 0 36px" },
+  successActions: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 32 },
+  successNav: { fontSize: 12, color: "#2E2E2E", maxWidth: 340 },
   emptyMsg: { textAlign: "center", color: "#2E2E2E", padding: "40px 0", fontSize: 14 },
 
   // Gallery & section headers
