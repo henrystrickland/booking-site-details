@@ -85,6 +85,16 @@ export default function App() {
             </div>
             <h1 style={s.heroTitle}>C&H Elite Auto Detailing</h1>
             <p style={s.heroTagline}>Premium · Professional · Mobile</p>
+            <div style={s.socialRow}>
+              <a href="https://instagram.com/ch.autodetails" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                @ch.autodetails
+              </a>
+              <a href="https://www.facebook.com/search/pages/?q=C%26H+Elite+Auto+Detailing" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                C&H Elite Auto Detailing
+              </a>
+            </div>
           </div>
         )}
         {view === "client" && <ClientView />}
@@ -366,7 +376,7 @@ function GalleryView() {
     <div>
       <div style={s.galleryHero}>
         <h2 style={s.galleryHeroTitle}>Our Work</h2>
-        <p style={s.galleryHeroSub}>Before & After · Premium Results</p>
+        <p style={s.galleryHeroSub}>Premium Auto Detailing · Our Best Work</p>
       </div>
       {loading ? (
         <p style={s.emptyMsg}>Loading...</p>
@@ -600,6 +610,8 @@ const s = {
   heroLogo: { width: 130, height: 130, borderRadius: "50%", objectFit: "cover", display: "block" },
   heroTitle: { fontSize: 24, fontWeight: 800, color: "#F9FAFB", letterSpacing: "-0.02em", margin: 0, textAlign: "center" },
   heroTagline: { fontSize: 11, color: "#F97316", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", margin: 0 },
+  socialRow: { display: "flex", gap: 10, marginTop: 4 },
+  socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#D1D5DB", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" },
   nav: { display: "flex", gap: 4 },
   navBtn: { padding: "7px 18px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#9CA3AF", fontFamily: "inherit" },
   navBtnActive: { background: "rgba(249,115,22,0.15)", color: "#F97316", borderColor: "rgba(249,115,22,0.35)" },
