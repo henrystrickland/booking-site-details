@@ -136,6 +136,7 @@ export default function App() {
             </div>
           </div>
         )}
+        {view === "client" && <ShareBanner />}
         {view === "client" && <ClientView />}
         {view === "client" && <FloatingReviews />}
         {view === "gallery" && <GalleryView />}
@@ -149,6 +150,45 @@ export default function App() {
           <button style={s.adminLink} onClick={() => setView("admin")}>admin</button>
         </footer>
       )}
+    </div>
+  );
+}
+
+function ShareBanner() {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const data = {
+      title: "C&H Elite Auto Detailing",
+      text: "Check out C&H Elite Auto Detailing — premium mobile detailing in Northern Virginia!",
+      url: window.location.href,
+    };
+    if (navigator.share) {
+      try { await navigator.share(data); } catch (_) {}
+    } else {
+      await navigator.clipboard.writeText(`${data.text} ${data.url}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  return (
+    <div style={s.shareBanner}>
+      <div>
+        <div style={s.shareTitle}>Know someone who needs a detail?</div>
+        <div style={s.shareSub}>Send them our way — one tap shares the link.</div>
+      </div>
+      <button style={{ ...s.shareBtn, ...(copied ? s.shareBtnCopied : {}) }} onClick={handleShare}>
+        {copied ? "Link copied!" : (
+          <>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            Recommend Us
+          </>
+        )}
+      </button>
     </div>
   );
 }
@@ -851,6 +891,13 @@ const s = {
   valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 3 },
   valueSub: { fontSize: 11, color: "#3A3A3A", lineHeight: 1.45 },
   valueSep: { width: 1, background: "#141414", flexShrink: 0 },
+
+  // Share banner
+  shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 12, padding: "22px 26px", marginBottom: 28, flexWrap: "wrap" },
+  shareTitle: { fontSize: 16, fontWeight: 700, color: "#EEEEEE", marginBottom: 5, letterSpacing: "-0.01em" },
+  shareSub: { fontSize: 12, color: "#3A3A3A" },
+  shareBtn: { display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", flexShrink: 0 },
+  shareBtnCopied: { background: "#14532D", color: "#86EFAC" },
 
   // Card — orange top accent border
   card: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderTop: "2px solid #F97316", borderRadius: 12, padding: "32px 28px" },
