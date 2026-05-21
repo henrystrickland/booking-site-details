@@ -58,8 +58,7 @@ export default function App() {
     <div style={s.app}>
       <header style={s.header}>
         <div style={s.logo}>
-          <span style={s.logoMark}>◆</span>
-          <span style={s.logoText}>C&H Elite Auto Detailing</span>
+          <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.logoImg} />
         </div>
         <nav style={s.nav}>
           <button
@@ -78,6 +77,11 @@ export default function App() {
       </header>
 
       <main style={s.main}>
+        {view === "client" && (
+          <div style={s.hero}>
+            <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
+          </div>
+        )}
         {view === "client" && <ClientView />}
         {view === "admin" && !adminAuthed && <AdminLogin onAuth={() => setAdminAuthed(true)} />}
         {view === "admin" && adminAuthed && <AdminView />}
@@ -437,9 +441,10 @@ function AdminView() {
 const s = {
   app: { minHeight: "100vh", background: "#0C0C0C", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" },
   header: { background: "#111111", borderBottom: "1px solid #222222", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 },
-  logo: { display: "flex", alignItems: "center", gap: 10 },
-  logoMark: { fontSize: 18, color: "#F97316" },
-  logoText: { fontWeight: 700, fontSize: 16, letterSpacing: "-0.01em", color: "#F9FAFB" },
+  logo: { display: "flex", alignItems: "center" },
+  logoImg: { height: 44, width: 44, borderRadius: 8, objectFit: "cover" },
+  hero: { display: "flex", justifyContent: "center", marginBottom: 24 },
+  heroLogo: { width: 160, height: 160, borderRadius: 20, objectFit: "cover", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" },
   nav: { display: "flex", gap: 4 },
   navBtn: { padding: "6px 16px", borderRadius: 6, border: "1px solid #2A2A2A", background: "transparent", cursor: "pointer", fontSize: 14, fontWeight: 500, color: "#9CA3AF" },
   navBtnActive: { background: "#1C1007", color: "#F97316", borderColor: "#7C2D12" },
