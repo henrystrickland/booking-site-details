@@ -90,8 +90,7 @@ export default function App() {
         <div style={s.logo}>
           <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.logoImg} />
           <div>
-            <div style={s.logoName}>C&H Elite</div>
-            <div style={s.logoSub}>Auto Detailing</div>
+            <div style={s.logoName}><span style={{ color: "#F97316" }}>C&H</span> <span style={{ color: "#EEEEEE", fontWeight: 400 }}>Elite Auto Detailing</span></div>
           </div>
         </div>
         {view !== "admin" ? (
@@ -919,8 +918,7 @@ const s = {
   header: { background: "#080808", borderTop: "2px solid #F97316", borderBottom: "1px solid #141414", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 58, position: "sticky", top: 0, zIndex: 10 },
   logo: { display: "flex", alignItems: "center", gap: 10 },
   logoImg: { height: 32, width: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid #1E1E1E" },
-  logoName: { fontSize: 14, fontWeight: 700, color: "#F97316", lineHeight: 1.2, letterSpacing: "-0.01em" },
-  logoSub: { fontSize: 9, color: "#3A3A3A", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" },
+  logoName: { fontSize: 14, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em" },
   nav: { display: "flex", height: "100%" },
   navBtn: { padding: "0 18px", border: "none", background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#4A4A4A", fontFamily: "inherit", display: "flex", alignItems: "center", height: "100%" },
   navBtnActive: { color: "#EEEEEE" },
