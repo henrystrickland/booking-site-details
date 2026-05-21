@@ -928,14 +928,14 @@ const s = {
   main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
 
   // Hero — dot grid background, big bold typography
-  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "64px 24px 52px", marginBottom: 36, backgroundImage: "radial-gradient(circle, #1A1A1A 1px, transparent 1px)", backgroundSize: "24px 24px", borderRadius: 16, position: "relative" },
+  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "44px 24px 36px", marginBottom: 28, backgroundImage: "radial-gradient(circle, #1A1A1A 1px, transparent 1px)", backgroundSize: "24px 24px", borderRadius: 16, position: "relative" },
   heroLogoWrap: { padding: 6, borderRadius: "50%", border: "1px solid rgba(249,115,22,0.2)" },
   heroLogo: { width: 90, height: 90, borderRadius: "50%", objectFit: "cover", border: "1px solid #1E1E1E", display: "block" },
   heroTitle: { fontSize: 46, fontWeight: 800, color: "#EEEEEE", letterSpacing: "-0.035em", margin: 0, textAlign: "center", lineHeight: 1.05 },
   heroRule: { display: "flex", alignItems: "center", gap: 14, width: "100%", maxWidth: 380 },
   heroRuleLine: { flex: 1, height: 1, background: "#1A1A1A" },
   heroStats: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", whiteSpace: "nowrap" },
-  phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 8, border: "1px solid #1E1E1E", background: "#0C0C0C", color: "#EEEEEE", fontSize: 15, fontWeight: 600, textDecoration: "none", marginTop: 4 },
+  phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 8, border: "1px solid #1E1E1E", background: "#0C0C0C", color: "#EEEEEE", fontSize: 15, fontWeight: 600, textDecoration: "none", marginTop: 2 },
   socialRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" },
   socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, border: "1px solid #161616", background: "transparent", color: "#4A4A4A", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit" },
   footer: { textAlign: "center", paddingBottom: 28 },
