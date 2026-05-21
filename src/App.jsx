@@ -78,10 +78,15 @@ export default function App() {
       <main style={s.main}>
         {view === "client" && (
           <div style={s.hero}>
-            <p style={s.heroLabel}>Premium Auto Detailing</p>
-            <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
+            <div style={s.heroLogoWrap}>
+              <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
+            </div>
             <h1 style={s.heroTitle}>C&H Elite<br />Auto Detailing</h1>
-            <p style={s.heroStats}>Mobile · Premium · Northern Virginia</p>
+            <div style={s.heroRule}>
+              <div style={s.heroRuleLine} />
+              <span style={s.heroStats}>Mobile · Northern Virginia</span>
+              <div style={s.heroRuleLine} />
+            </div>
             <a href="tel:7033767536" style={s.phoneLink}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 12a19.79 19.79 0 0 1-3-8.63A2 2 0 0 1 3 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16l.92.92z"/></svg>
               (703) 376-7536
@@ -826,11 +831,13 @@ const s = {
   main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
 
   // Hero — dot grid background, big bold typography
-  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: "64px 24px 52px", marginBottom: 36, backgroundImage: "radial-gradient(circle, #1A1A1A 1px, transparent 1px)", backgroundSize: "24px 24px", borderRadius: 16, position: "relative" },
-  heroLabel: { fontSize: 10, fontWeight: 700, color: "#F97316", letterSpacing: "0.22em", textTransform: "uppercase", margin: 0 },
-  heroLogo: { width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: "2px solid #1E1E1E" },
+  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "64px 24px 52px", marginBottom: 36, backgroundImage: "radial-gradient(circle, #1A1A1A 1px, transparent 1px)", backgroundSize: "24px 24px", borderRadius: 16, position: "relative" },
+  heroLogoWrap: { padding: 6, borderRadius: "50%", border: "1px solid rgba(249,115,22,0.2)" },
+  heroLogo: { width: 90, height: 90, borderRadius: "50%", objectFit: "cover", border: "1px solid #1E1E1E", display: "block" },
   heroTitle: { fontSize: 46, fontWeight: 800, color: "#EEEEEE", letterSpacing: "-0.035em", margin: 0, textAlign: "center", lineHeight: 1.05 },
-  heroStats: { fontSize: 12, color: "#4A4A4A", fontWeight: 500, letterSpacing: "0.05em", margin: 0, textAlign: "center" },
+  heroRule: { display: "flex", alignItems: "center", gap: 14, width: "100%", maxWidth: 380 },
+  heroRuleLine: { flex: 1, height: 1, background: "#1A1A1A" },
+  heroStats: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", whiteSpace: "nowrap" },
   phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 8, border: "1px solid #1E1E1E", background: "#0C0C0C", color: "#EEEEEE", fontSize: 15, fontWeight: 600, textDecoration: "none", marginTop: 4 },
   socialRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" },
   socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, border: "1px solid #161616", background: "transparent", color: "#4A4A4A", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit" },
