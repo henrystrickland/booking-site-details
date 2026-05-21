@@ -570,32 +570,6 @@ function ReviewsView() {
         <p style={s.galleryHeroSub}>What our customers say</p>
       </div>
 
-      {!loading && reviews.length > 0 && (
-        <div style={s.reviewStats}>
-          <div style={s.reviewAvgBlock}>
-            <span style={s.reviewAvgNum}>{avgDisplay}</span>
-            <div style={s.reviewAvgStars}>
-              {[1,2,3,4,5].map(n => <span key={n} style={{ color: n <= Math.round(avg) ? "#F97316" : "rgba(255,255,255,0.15)", fontSize: 22 }}>★</span>)}
-            </div>
-            <span style={s.reviewCount}>{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
-          </div>
-          <div style={s.reviewBars}>
-            {[5,4,3,2,1].map(n => {
-              const count = reviews.filter(r => r.rating === n).length;
-              return (
-                <div key={n} style={s.reviewBarRow}>
-                  <span style={s.reviewBarLabel}>{n}★</span>
-                  <div style={s.reviewBarTrack}>
-                    <div style={{ ...s.reviewBarFill, width: reviews.length ? `${(count / reviews.length) * 100}%` : "0%" }} />
-                  </div>
-                  <span style={s.reviewBarCount}>{count}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       <div style={s.card}>
         {submitted ? (
           <div style={{ textAlign: "center", padding: "12px 0" }}>
@@ -648,6 +622,32 @@ function ReviewsView() {
           </div>
         )}
       </div>
+
+      {!loading && reviews.length > 0 && (
+        <div style={s.reviewStats}>
+          <div style={s.reviewAvgBlock}>
+            <span style={s.reviewAvgNum}>{avgDisplay}</span>
+            <div style={s.reviewAvgStars}>
+              {[1,2,3,4,5].map(n => <span key={n} style={{ color: n <= Math.round(avg) ? "#F97316" : "rgba(255,255,255,0.15)", fontSize: 22 }}>★</span>)}
+            </div>
+            <span style={s.reviewCount}>{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+          </div>
+          <div style={s.reviewBars}>
+            {[5,4,3,2,1].map(n => {
+              const count = reviews.filter(r => r.rating === n).length;
+              return (
+                <div key={n} style={s.reviewBarRow}>
+                  <span style={s.reviewBarLabel}>{n}★</span>
+                  <div style={s.reviewBarTrack}>
+                    <div style={{ ...s.reviewBarFill, width: reviews.length ? `${(count / reviews.length) * 100}%` : "0%" }} />
+                  </div>
+                  <span style={s.reviewBarCount}>{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {!loading && reviews.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
