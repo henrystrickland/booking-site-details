@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://uzxsqstnjtcxvyopapuq.supabase.co";
@@ -50,6 +50,31 @@ const STATUS_STYLES = {
   cancelled: { bg: "#3B0000", color: "#FCA5A5", label: "Cancelled" },
 };
 
+function NavTabs({ view, setView }) {
+  const ref = useRef(null);
+  const [ind, setInd] = useState({ left: 0, width: 0 });
+  const tabs = [{ key: "client", label: "Book" }, { key: "gallery", label: "Gallery" }, { key: "reviews", label: "Reviews" }];
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const idx = tabs.findIndex(t => t.key === view);
+    if (idx < 0) return;
+    const btn = ref.current.querySelectorAll("button")[idx];
+    if (btn) setInd({ left: btn.offsetLeft, width: btn.offsetWidth });
+  }, [view]);
+
+  return (
+    <div style={{ position: "relative", display: "flex", height: "100%" }} ref={ref}>
+      {tabs.map(t => (
+        <button key={t.key} style={{ ...s.navBtn, ...(view === t.key ? s.navBtnActive : {}) }} onClick={() => setView(t.key)}>
+          {t.label}
+        </button>
+      ))}
+      <div style={{ position: "absolute", bottom: -1, left: ind.left, width: ind.width, height: 2, background: "#F97316", transition: "left 0.22s cubic-bezier(0.4,0,0.2,1), width 0.22s cubic-bezier(0.4,0,0.2,1)", pointerEvents: "none" }} />
+    </div>
+  );
+}
+
 export default function App() {
   const [view, setView] = useState("client");
   const [adminAuthed, setAdminAuthed] = useState(false);
@@ -65,11 +90,7 @@ export default function App() {
           </div>
         </div>
         {view !== "admin" ? (
-          <nav style={s.nav}>
-            <button style={{ ...s.navBtn, ...(view === "client" ? s.navBtnActive : {}) }} onClick={() => setView("client")}>Book</button>
-            <button style={{ ...s.navBtn, ...(view === "gallery" ? s.navBtnActive : {}) }} onClick={() => setView("gallery")}>Gallery</button>
-            <button style={{ ...s.navBtn, ...(view === "reviews" ? s.navBtnActive : {}) }} onClick={() => setView("reviews")}>Reviews</button>
-          </nav>
+          <NavTabs view={view} setView={setView} />
         ) : (
           <button style={s.backBtn} onClick={() => setView("client")}>← Back</button>
         )}
@@ -103,39 +124,7 @@ export default function App() {
             </div>
           </div>
         )}
-        {view === "client" && (
-          <div style={s.valueRow}>
-            <div style={s.valueItem}>
-              <div style={s.valueIconWrap}>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              </div>
-              <div>
-                <div style={s.valueTitle}>We Come to You</div>
-                <div style={s.valueSub}>Mobile service at your home or office</div>
-              </div>
-            </div>
-            <div style={s.valueSep} />
-            <div style={s.valueItem}>
-              <div style={s.valueIconWrap}>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <div>
-                <div style={s.valueTitle}>Professional Service</div>
-                <div style={s.valueSub}>Quality results every time</div>
-              </div>
-            </div>
-            <div style={s.valueSep} />
-            <div style={s.valueItem}>
-              <div style={s.valueIconWrap}>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              </div>
-              <div>
-                <div style={s.valueTitle}>5-Star Rated</div>
-                <div style={s.valueSub}>Top-rated in Northern Virginia</div>
-              </div>
-            </div>
-          </div>
-        )}
+        {view === "client" && <ValueProps />}
         {view === "client" && (
           <div style={s.bookingHeader}>
             <div style={s.bookingHeaderTop}>
@@ -159,6 +148,42 @@ export default function App() {
           <button style={s.adminLink} onClick={() => setView("admin")}>admin</button>
         </footer>
       )}
+    </div>
+  );
+}
+
+function ValueProps() {
+  const [mobile, setMobile] = useState(() => window.innerWidth < 600);
+  useEffect(() => {
+    const h = () => setMobile(window.innerWidth < 600);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
+
+  const items = [
+    { icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, title: "We Come to You", sub: "Mobile service at your home or office" },
+    { icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title: "Professional Service", sub: "Quality results every time" },
+    { icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, title: "5-Star Rated", sub: "Top-rated in Northern Virginia" },
+  ];
+
+  const sepStyle = mobile
+    ? { height: 1, background: "#141414" }
+    : { width: 1, background: "#141414", alignSelf: "stretch", flexShrink: 0 };
+
+  return (
+    <div style={{ ...s.valueRow, flexDirection: mobile ? "column" : "row" }}>
+      {items.map((item, i) => (
+        <>
+          <div key={i} style={s.valueItem}>
+            <div style={s.valueIconWrap}>{item.icon}</div>
+            <div>
+              <div style={s.valueTitle}>{item.title}</div>
+              <div style={s.valueSub}>{item.sub}</div>
+            </div>
+          </div>
+          {i < 2 && <div key={`sep-${i}`} style={sepStyle} />}
+        </>
+      ))}
     </div>
   );
 }
@@ -874,8 +899,8 @@ const s = {
   logoName: { fontSize: 14, fontWeight: 700, color: "#F97316", lineHeight: 1.2, letterSpacing: "-0.01em" },
   logoSub: { fontSize: 9, color: "#3A3A3A", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" },
   nav: { display: "flex", height: "100%" },
-  navBtn: { padding: "0 18px", border: "none", background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#4A4A4A", fontFamily: "inherit", borderBottom: "2px solid transparent", display: "flex", alignItems: "center", marginBottom: -1 },
-  navBtnActive: { color: "#EEEEEE", borderBottomColor: "#F97316" },
+  navBtn: { padding: "0 18px", border: "none", background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#4A4A4A", fontFamily: "inherit", display: "flex", alignItems: "center", height: "100%" },
+  navBtnActive: { color: "#EEEEEE" },
   backBtn: { padding: "7px 16px", borderRadius: 7, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 13, color: "#555", fontFamily: "inherit" },
   main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
 
@@ -901,12 +926,12 @@ const s = {
   bookingHeaderSub: { fontSize: 13, color: "#4A4A4A", margin: 0 },
 
   // Value props strip
-  valueRow: { display: "flex", alignItems: "stretch", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginBottom: 32, overflow: "hidden" },
+  valueRow: { display: "flex", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginBottom: 32, overflow: "hidden" },
   valueItem: { flex: 1, display: "flex", alignItems: "center", gap: 14, padding: "20px 22px" },
   valueIconWrap: { width: 38, height: 38, borderRadius: 9, background: "rgba(249,115,22,0.07)", border: "1px solid rgba(249,115,22,0.14)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 3 },
   valueSub: { fontSize: 11, color: "#3A3A3A", lineHeight: 1.45 },
-  valueSep: { width: 1, background: "#141414", flexShrink: 0 },
+  valueSep: {},
 
   // Share banner
   shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 12, padding: "22px 26px", marginBottom: 0, flexWrap: "wrap" },
