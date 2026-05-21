@@ -98,6 +98,39 @@ export default function App() {
             </div>
           </div>
         )}
+        {view === "client" && (
+          <div style={s.valueRow}>
+            <div style={s.valueItem}>
+              <div style={s.valueIconWrap}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div>
+                <div style={s.valueTitle}>We Come to You</div>
+                <div style={s.valueSub}>Mobile service at your home or office</div>
+              </div>
+            </div>
+            <div style={s.valueSep} />
+            <div style={s.valueItem}>
+              <div style={s.valueIconWrap}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div>
+                <div style={s.valueTitle}>Insured &amp; Professional</div>
+                <div style={s.valueSub}>Fully covered for peace of mind</div>
+              </div>
+            </div>
+            <div style={s.valueSep} />
+            <div style={s.valueItem}>
+              <div style={s.valueIconWrap}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div>
+                <div style={s.valueTitle}>5-Star Rated</div>
+                <div style={s.valueSub}>Top-rated in Northern Virginia</div>
+              </div>
+            </div>
+          </div>
+        )}
         {view === "client" && <ClientView />}
         {view === "client" && <FloatingReviews />}
         {view === "gallery" && <GalleryView />}
@@ -803,6 +836,14 @@ const s = {
   socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, border: "1px solid #161616", background: "transparent", color: "#4A4A4A", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit" },
   footer: { textAlign: "center", paddingBottom: 28 },
   adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1C1C1C", fontFamily: "inherit" },
+
+  // Value props strip
+  valueRow: { display: "flex", alignItems: "stretch", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginBottom: 28, overflow: "hidden" },
+  valueItem: { flex: 1, display: "flex", alignItems: "center", gap: 14, padding: "20px 22px" },
+  valueIconWrap: { width: 38, height: 38, borderRadius: 9, background: "rgba(249,115,22,0.07)", border: "1px solid rgba(249,115,22,0.14)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 3 },
+  valueSub: { fontSize: 11, color: "#3A3A3A", lineHeight: 1.45 },
+  valueSep: { width: 1, background: "#141414", flexShrink: 0 },
 
   // Card — orange top accent border
   card: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderTop: "2px solid #F97316", borderRadius: 12, padding: "32px 28px" },
