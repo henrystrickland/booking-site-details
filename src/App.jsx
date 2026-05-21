@@ -104,43 +104,44 @@ export default function App() {
       <main style={s.main}>
         {view === "client" && booked && <SuccessView form={bookedForm} onReset={handleReset} />}
         {view === "client" && !booked && (
-          <div style={s.hero}>
-            <div style={s.heroLogoWrap}>
-              <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
-            </div>
-            <h1 style={s.heroTitle}>C&H Elite<br />Auto Detailing</h1>
-            <div style={s.heroRule}>
-              <div style={s.heroRuleLine} />
-              <span style={s.heroStats}>Mobile · Northern Virginia</span>
-              <div style={s.heroRuleLine} />
-            </div>
-            <a href="tel:7033767536" style={s.phoneLink}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 12a19.79 19.79 0 0 1-3-8.63A2 2 0 0 1 3 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16l.92.92z"/></svg>
-              (703) 376-7536
-            </a>
-            <div style={s.socialRow}>
-              <a href="https://instagram.com/ch.autodetails" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-                @ch.autodetails
+          <>
+            <div style={s.hero}>
+              <div style={s.heroLogoWrap}>
+                <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
+              </div>
+              <h1 style={s.heroTitle}>C&H Elite<br />Auto Detailing</h1>
+              <div style={s.heroRule}>
+                <div style={s.heroRuleLine} />
+                <span style={s.heroStats}>Mobile · Northern Virginia</span>
+                <div style={s.heroRuleLine} />
+              </div>
+              <a href="tel:7033767536" style={s.phoneLink}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 12a19.79 19.79 0 0 1-3-8.63A2 2 0 0 1 3 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16l.92.92z"/></svg>
+                (703) 376-7536
               </a>
-              <a href="https://www.facebook.com/people/CH-Elite-Auto-Detailing/61572140056742/" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                C&H Elite Auto Detailing
-              </a>
+              <div style={s.socialRow}>
+                <a href="https://instagram.com/ch.autodetails" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                  @ch.autodetails
+                </a>
+                <a href="https://www.facebook.com/people/CH-Elite-Auto-Detailing/61572140056742/" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                  C&H Elite Auto Detailing
+                </a>
+              </div>
             </div>
-          </div>
-        )}
-          <ValueProps />
-          <div style={s.bookingHeader}>
-            <div style={s.bookingHeaderTop}>
-              <h2 style={s.bookingHeaderTitle}>Book Your Detail</h2>
-              <span style={s.bookingHeaderBadge}>Takes 2 minutes</span>
+            <ValueProps />
+            <div style={s.bookingHeader}>
+              <div style={s.bookingHeaderTop}>
+                <h2 style={s.bookingHeaderTitle}>Book Your Detail</h2>
+                <span style={s.bookingHeaderBadge}>Takes 2 minutes</span>
+              </div>
+              <p style={s.bookingHeaderSub}>Pick your service, choose a time, and we'll come to you.</p>
             </div>
-            <p style={s.bookingHeaderSub}>Pick your service, choose a time, and we'll come to you.</p>
-          </div>
-          <ClientView onBooked={handleBooked} />
-          <ShareBanner />
-          <FloatingReviews />
+            <ClientView onBooked={handleBooked} />
+            <ShareBanner />
+            <FloatingReviews />
+          </>
         )}
         {view === "gallery" && <GalleryView />}
         {view === "reviews" && <ReviewsView />}
