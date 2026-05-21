@@ -71,6 +71,7 @@ export default function App() {
           <nav style={s.nav}>
             <button style={{ ...s.navBtn, ...(view === "client" ? s.navBtnActive : {}) }} onClick={() => setView("client")}>Book</button>
             <button style={{ ...s.navBtn, ...(view === "gallery" ? s.navBtnActive : {}) }} onClick={() => setView("gallery")}>Gallery</button>
+            <button style={{ ...s.navBtn, ...(view === "reviews" ? s.navBtnActive : {}) }} onClick={() => setView("reviews")}>Reviews</button>
           </nav>
         ) : (
           <button style={s.backBtn} onClick={() => setView("client")}>← Back</button>
@@ -85,6 +86,10 @@ export default function App() {
             </div>
             <h1 style={s.heroTitle}>C&H Elite Auto Detailing</h1>
             <p style={s.heroTagline}>Premium · Professional · Mobile</p>
+            <a href="tel:7033767536" style={s.phoneLink}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 12a19.79 19.79 0 0 1-3-8.63A2 2 0 0 1 3 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16l.92.92z"/></svg>
+              (703) 376-7536
+            </a>
             <div style={s.socialRow}>
               <a href="https://instagram.com/ch.autodetails" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
@@ -98,7 +103,9 @@ export default function App() {
           </div>
         )}
         {view === "client" && <ClientView />}
+        {view === "client" && <FloatingReviews />}
         {view === "gallery" && <GalleryView />}
+        {view === "reviews" && <ReviewsView />}
         {view === "admin" && !adminAuthed && <AdminLogin onAuth={() => setAdminAuthed(true)} />}
         {view === "admin" && adminAuthed && <AdminView />}
       </main>
@@ -351,6 +358,184 @@ function AdminLogin({ onAuth }) {
         {err && <span style={{ color: "#EF4444", fontSize: 13 }}>Incorrect password</span>}
       </div>
       <button style={s.btnPrimary} onClick={attempt}>Log in</button>
+    </div>
+  );
+}
+
+function FloatingReviews() {
+  const [reviews, setReviews] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    supabase.from("reviews").select("*").eq("rating", 5).not("comment", "is", null)
+      .order("created_at", { ascending: false }).limit(20)
+      .then(({ data }) => {
+        const eligible = (data || []).filter(r => r.comment && r.comment.trim());
+        if (eligible.length > 0) { setReviews(eligible); setTimeout(() => setVisible(true), 1000); }
+      });
+  }, []);
+
+  useEffect(() => {
+    if (reviews.length < 2) return;
+    const t = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => { setIdx(i => (i + 1) % reviews.length); setVisible(true); }, 700);
+    }, 7000);
+    return () => clearInterval(t);
+  }, [reviews.length]);
+
+  if (reviews.length === 0) return null;
+  const r = reviews[idx];
+  return (
+    <div className="floating-review" style={s.floatingWrap}>
+      <div style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(12px)", transition: "opacity 0.7s ease, transform 0.7s ease" }}>
+        <div style={s.floatingCard}>
+          <div style={s.floatingStars}>★★★★★</div>
+          <p style={s.floatingComment}>"{r.comment}"</p>
+          <span style={s.floatingName}>— {r.anonymous ? "Anonymous" : (r.reviewer_name || "Anonymous")}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReviewsView() {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [hovered, setHovered] = useState(0);
+  const [form, setForm] = useState({ rating: 0, comment: "", name: "", anonymous: false });
+
+  const fetchReviews = () => {
+    supabase.from("reviews").select("*").order("created_at", { ascending: false })
+      .then(({ data }) => { setReviews(data || []); setLoading(false); });
+  };
+  useEffect(() => { fetchReviews(); }, []);
+
+  const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : 0;
+  const avgDisplay = avg ? avg.toFixed(1) : null;
+
+  const submit = async () => {
+    if (!form.rating) return;
+    setSubmitting(true);
+    await supabase.from("reviews").insert([{
+      rating: form.rating,
+      comment: form.comment.trim() || null,
+      reviewer_name: form.anonymous ? null : (form.name.trim() || null),
+      anonymous: form.anonymous,
+    }]);
+    setSubmitting(false);
+    setSubmitted(true);
+    fetchReviews();
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <div style={s.galleryHero}>
+        <h2 style={s.galleryHeroTitle}>Reviews</h2>
+        <p style={s.galleryHeroSub}>What our customers say</p>
+      </div>
+
+      {!loading && reviews.length > 0 && (
+        <div style={s.reviewStats}>
+          <div style={s.reviewAvgBlock}>
+            <span style={s.reviewAvgNum}>{avgDisplay}</span>
+            <div style={s.reviewAvgStars}>
+              {[1,2,3,4,5].map(n => <span key={n} style={{ color: n <= Math.round(avg) ? "#F97316" : "rgba(255,255,255,0.15)", fontSize: 22 }}>★</span>)}
+            </div>
+            <span style={s.reviewCount}>{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+          </div>
+          <div style={s.reviewBars}>
+            {[5,4,3,2,1].map(n => {
+              const count = reviews.filter(r => r.rating === n).length;
+              return (
+                <div key={n} style={s.reviewBarRow}>
+                  <span style={s.reviewBarLabel}>{n}★</span>
+                  <div style={s.reviewBarTrack}>
+                    <div style={{ ...s.reviewBarFill, width: reviews.length ? `${(count / reviews.length) * 100}%` : "0%" }} />
+                  </div>
+                  <span style={s.reviewBarCount}>{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div style={s.card}>
+        {submitted ? (
+          <div style={{ textAlign: "center", padding: "12px 0" }}>
+            <div style={s.successIcon}>✓</div>
+            <h3 style={{ color: "#F9FAFB", margin: "16px 0 8px", fontSize: 18 }}>Thank you!</h3>
+            <p style={{ color: "#9CA3AF", fontSize: 14 }}>Your review has been submitted.</p>
+            <button style={{ ...s.btnPrimary, marginTop: 20 }} onClick={() => { setSubmitted(false); setForm({ rating: 0, comment: "", name: "", anonymous: false }); }}>
+              Write another
+            </button>
+          </div>
+        ) : (
+          <div style={s.formSection}>
+            <h2 style={s.sectionTitle}>Leave a review</h2>
+            <div style={s.fieldGroup}>
+              <label style={s.label}>Your rating</label>
+              <div style={s.starPicker}>
+                {[1,2,3,4,5].map(n => (
+                  <button key={n} style={s.starPickBtn}
+                    onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
+                    onClick={() => setForm(f => ({ ...f, rating: n }))}>
+                    <span style={{ color: (hovered || form.rating) >= n ? "#F97316" : "rgba(255,255,255,0.15)", fontSize: 48, lineHeight: 1, display: "block" }}>★</span>
+                  </button>
+                ))}
+              </div>
+              {form.rating > 0 && (
+                <span style={{ fontSize: 13, color: "#F97316", fontWeight: 600 }}>
+                  {["","Poor","Fair","Good","Great","Excellent!"][form.rating]}
+                </span>
+              )}
+            </div>
+            <div style={s.fieldGroup}>
+              <label style={s.label}>Your name <span style={{ color: "#6B7280", fontWeight: 400 }}>(optional)</span></label>
+              <input style={{ ...s.input, ...(form.anonymous ? { opacity: 0.35, pointerEvents: "none" } : {}) }}
+                value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Jane Smith" />
+              <label style={s.anonRow}>
+                <input type="checkbox" checked={form.anonymous} onChange={e => setForm(f => ({ ...f, anonymous: e.target.checked }))} style={{ accentColor: "#F97316", width: 16, height: 16 }} />
+                <span style={{ fontSize: 13, color: "#9CA3AF" }}>Post anonymously</span>
+              </label>
+            </div>
+            <div style={s.fieldGroup}>
+              <label style={s.label}>Comment <span style={{ color: "#6B7280", fontWeight: 400 }}>(optional)</span></label>
+              <textarea style={{ ...s.input, minHeight: 100, resize: "vertical" }}
+                value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))}
+                placeholder="Tell us about your experience..." />
+            </div>
+            <button style={{ ...s.btnPrimary, ...(!form.rating ? s.btnDisabled : {}) }}
+              disabled={!form.rating || submitting} onClick={submit}>
+              {submitting ? "Submitting..." : "Submit review"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {!loading && reviews.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#F9FAFB", margin: "0 0 4px" }}>All reviews</h3>
+          {reviews.map(r => (
+            <div key={r.id} style={s.reviewCard}>
+              <div style={s.reviewCardTop}>
+                <div>
+                  <div style={s.reviewerName}>{r.anonymous ? "Anonymous" : (r.reviewer_name || "Anonymous")}</div>
+                  <div style={{ fontSize: 18, letterSpacing: 1 }}>
+                    {[1,2,3,4,5].map(n => <span key={n} style={{ color: n <= r.rating ? "#F97316" : "rgba(255,255,255,0.12)" }}>★</span>)}
+                  </div>
+                </div>
+                <span style={s.reviewDate}>{new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+              </div>
+              {r.comment && <p style={s.reviewComment}>"{r.comment}"</p>}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -610,8 +795,33 @@ const s = {
   heroLogo: { width: 130, height: 130, borderRadius: "50%", objectFit: "cover", display: "block" },
   heroTitle: { fontSize: 24, fontWeight: 800, color: "#F9FAFB", letterSpacing: "-0.02em", margin: 0, textAlign: "center" },
   heroTagline: { fontSize: 11, color: "#F97316", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", margin: 0 },
-  socialRow: { display: "flex", gap: 10, marginTop: 4 },
+  phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 10, border: "1px solid rgba(249,115,22,0.3)", background: "rgba(249,115,22,0.1)", color: "#F9FAFB", fontSize: 16, fontWeight: 700, textDecoration: "none", letterSpacing: "0.01em" },
+  socialRow: { display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap", justifyContent: "center" },
   socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#D1D5DB", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" },
+  floatingWrap: { position: "fixed", right: 24, top: "50%", marginTop: -80, zIndex: 5, width: 230 },
+  floatingCard: { background: "rgba(14,14,14,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 14, padding: "16px 18px", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" },
+  floatingStars: { color: "#F97316", fontSize: 16, letterSpacing: 2, marginBottom: 8 },
+  floatingComment: { fontSize: 13, color: "#E5E7EB", lineHeight: 1.5, margin: "0 0 10px", fontStyle: "italic" },
+  floatingName: { fontSize: 11, color: "#9CA3AF", fontWeight: 600, letterSpacing: "0.05em" },
+  reviewStats: { background: "rgba(18,18,18,0.75)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(249,115,22,0.12)", borderRadius: 16, padding: "24px 28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
+  reviewAvgBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 80 },
+  reviewAvgNum: { fontSize: 48, fontWeight: 800, color: "#F9FAFB", lineHeight: 1 },
+  reviewAvgStars: { display: "flex", gap: 2 },
+  reviewCount: { fontSize: 12, color: "#9CA3AF", fontWeight: 500, marginTop: 2 },
+  reviewBars: { flex: 1, display: "flex", flexDirection: "column", gap: 7, minWidth: 200 },
+  reviewBarRow: { display: "flex", alignItems: "center", gap: 10 },
+  reviewBarLabel: { fontSize: 12, color: "#9CA3AF", width: 24, textAlign: "right", flexShrink: 0 },
+  reviewBarTrack: { flex: 1, height: 8, background: "rgba(255,255,255,0.07)", borderRadius: 99, overflow: "hidden" },
+  reviewBarFill: { height: "100%", background: "linear-gradient(90deg, #F97316, #EA580C)", borderRadius: 99, transition: "width 0.6s ease" },
+  reviewBarCount: { fontSize: 12, color: "#6B7280", width: 20, flexShrink: 0 },
+  starPicker: { display: "flex", gap: 4, marginTop: 4 },
+  starPickBtn: { background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 },
+  anonRow: { display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginTop: 6 },
+  reviewCard: { background: "rgba(18,18,18,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: "1px solid rgba(249,115,22,0.1)", borderRadius: 12, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 },
+  reviewCardTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" },
+  reviewerName: { fontSize: 14, fontWeight: 700, color: "#F9FAFB", marginBottom: 4 },
+  reviewDate: { fontSize: 12, color: "#6B7280", flexShrink: 0 },
+  reviewComment: { fontSize: 14, color: "#D1D5DB", lineHeight: 1.6, fontStyle: "italic", margin: 0 },
   nav: { display: "flex", gap: 4 },
   navBtn: { padding: "7px 18px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#9CA3AF", fontFamily: "inherit" },
   navBtnActive: { background: "rgba(249,115,22,0.15)", color: "#F97316", borderColor: "rgba(249,115,22,0.35)" },
