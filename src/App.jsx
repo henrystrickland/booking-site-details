@@ -104,12 +104,6 @@ export default function App() {
           </div>
         )}
         {view === "client" && (
-          <div style={s.bookingLabel}>
-            <span style={s.bookingLabelText}>Book a Detail</span>
-          </div>
-        )}
-        {view === "client" && <ClientView />}
-        {view === "client" && (
           <div style={s.valueRow}>
             <div style={s.valueItem}>
               <div style={s.valueIconWrap}>
@@ -142,6 +136,16 @@ export default function App() {
             </div>
           </div>
         )}
+        {view === "client" && (
+          <div style={s.bookingHeader}>
+            <div style={s.bookingHeaderTop}>
+              <h2 style={s.bookingHeaderTitle}>Book Your Detail</h2>
+              <span style={s.bookingHeaderBadge}>Takes 2 minutes</span>
+            </div>
+            <p style={s.bookingHeaderSub}>Pick your service, choose a time, and we'll come to you.</p>
+          </div>
+        )}
+        {view === "client" && <ClientView />}
         {view === "client" && <ShareBanner />}
         {view === "client" && <FloatingReviews />}
         {view === "gallery" && <GalleryView />}
@@ -889,12 +893,15 @@ const s = {
   footer: { textAlign: "center", paddingBottom: 28 },
   adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1C1C1C", fontFamily: "inherit" },
 
-  // Booking section label
-  bookingLabel: { marginBottom: 12 },
-  bookingLabelText: { fontSize: 11, fontWeight: 700, color: "#F97316", letterSpacing: "0.14em", textTransform: "uppercase" },
+  // Booking section header
+  bookingHeader: { marginBottom: 14 },
+  bookingHeaderTop: { display: "flex", alignItems: "center", gap: 12, marginBottom: 6 },
+  bookingHeaderTitle: { fontSize: 28, fontWeight: 800, color: "#EEEEEE", margin: 0, letterSpacing: "-0.03em" },
+  bookingHeaderBadge: { fontSize: 11, fontWeight: 700, color: "#F97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 20, padding: "3px 10px", letterSpacing: "0.04em" },
+  bookingHeaderSub: { fontSize: 13, color: "#4A4A4A", margin: 0 },
 
   // Value props strip
-  valueRow: { display: "flex", alignItems: "stretch", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginTop: 28, marginBottom: 16, overflow: "hidden" },
+  valueRow: { display: "flex", alignItems: "stretch", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginBottom: 32, overflow: "hidden" },
   valueItem: { flex: 1, display: "flex", alignItems: "center", gap: 14, padding: "20px 22px" },
   valueIconWrap: { width: 38, height: 38, borderRadius: 9, background: "rgba(249,115,22,0.07)", border: "1px solid rgba(249,115,22,0.14)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 3 },
@@ -909,7 +916,7 @@ const s = {
   shareBtnCopied: { background: "#14532D", color: "#86EFAC" },
 
   // Card — orange top accent border
-  card: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderTop: "2px solid #F97316", borderRadius: 12, padding: "32px 28px" },
+  card: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderTop: "3px solid #F97316", borderRadius: 12, padding: "36px 32px" },
 
   // Step progress bar with connecting line
   stepBar: { display: "flex", justifyContent: "space-between", marginBottom: 36, position: "relative" },
@@ -923,7 +930,7 @@ const s = {
 
   // Form
   formSection: { display: "flex", flexDirection: "column", gap: 22 },
-  sectionTitle: { fontSize: 20, fontWeight: 700, color: "#EEEEEE", margin: "0 0 4px", letterSpacing: "-0.02em" },
+  sectionTitle: { fontSize: 22, fontWeight: 800, color: "#EEEEEE", margin: "0 0 4px", letterSpacing: "-0.02em" },
   fieldGroup: { display: "flex", flexDirection: "column", gap: 7 },
   label: { fontSize: 10, fontWeight: 700, color: "#4A4A4A", letterSpacing: "0.1em", textTransform: "uppercase" },
   input: { padding: "11px 14px", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box", width: "100%", background: "#080808", color: "#EEEEEE" },
@@ -957,8 +964,8 @@ const s = {
 
   // Buttons
   btnRow: { display: "flex", gap: 10, justifyContent: "flex-end" },
-  btnPrimary: { padding: "12px 24px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.09em", textTransform: "uppercase" },
-  btnSecondary: { padding: "12px 20px", background: "transparent", color: "#4A4A4A", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.04em" },
+  btnPrimary: { padding: "14px 28px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase" },
+  btnSecondary: { padding: "14px 22px", background: "transparent", color: "#4A4A4A", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.02em" },
   btnDisabled: { opacity: 0.22, cursor: "not-allowed" },
   errorBox: { background: "#180000", border: "1px solid #380000", color: "#FC8181", padding: "12px 14px", borderRadius: 8, fontSize: 13 },
 
