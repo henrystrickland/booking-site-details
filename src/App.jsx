@@ -115,8 +115,8 @@ export default function App() {
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               </div>
               <div>
-                <div style={s.valueTitle}>Insured &amp; Professional</div>
-                <div style={s.valueSub}>Fully covered for peace of mind</div>
+                <div style={s.valueTitle}>Professional Service</div>
+                <div style={s.valueSub}>Quality results every time</div>
               </div>
             </div>
             <div style={s.valueSep} />
