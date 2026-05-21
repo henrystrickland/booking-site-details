@@ -89,7 +89,7 @@ export default function App() {
       <header style={s.header}>
         <div style={s.logo}>
           <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.logoImg} />
-          <div>
+          <div className="logo-label">
             <div style={s.logoName}><span style={{ color: "#F97316" }}>C&H</span> <span style={{ color: "#EEEEEE", fontWeight: 400 }}>Elite Auto Detailing</span></div>
           </div>
         </div>
