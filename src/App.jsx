@@ -78,9 +78,10 @@ export default function App() {
       <main style={s.main}>
         {view === "client" && (
           <div style={s.hero}>
+            <p style={s.heroLabel}>Premium Auto Detailing</p>
             <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
-            <h1 style={s.heroTitle}>C&H Elite Auto Detailing</h1>
-            <p style={s.heroTagline}>Premium · Professional · Mobile</p>
+            <h1 style={s.heroTitle}>C&H Elite<br />Auto Detailing</h1>
+            <p style={s.heroStats}>Mobile · Mon, Wed &amp; Sat · Northern VA</p>
             <a href="tel:7033767536" style={s.phoneLink}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 12a19.79 19.79 0 0 1-3-8.63A2 2 0 0 1 3 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16l.92.92z"/></svg>
               (703) 376-7536
@@ -177,6 +178,7 @@ function ClientView() {
   return (
     <div style={s.card}>
       <div style={s.stepBar}>
+        <div style={s.stepLine} />
         {["Your info", "Service", "Date & time", "Confirm"].map((label, i) => (
           <div key={i} style={s.stepItem}>
             <div style={{ ...s.stepDot, ...(step > i + 1 ? s.stepDone : step === i + 1 ? s.stepActive : {}) }}>
@@ -777,129 +779,161 @@ function AdminView() {
 
 const s = {
   app: { minHeight: "100vh", background: "#080808", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" },
-  header: { background: "#080808", borderBottom: "1px solid #1A1A1A", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 56, position: "sticky", top: 0, zIndex: 10 },
+
+  // Header — thin orange top accent, underline nav
+  header: { background: "#080808", borderTop: "2px solid #F97316", borderBottom: "1px solid #141414", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 58, position: "sticky", top: 0, zIndex: 10 },
   logo: { display: "flex", alignItems: "center", gap: 10 },
-  logoImg: { height: 34, width: 34, borderRadius: "50%", objectFit: "cover", border: "1px solid #2A2A2A", flexShrink: 0 },
-  logoName: { fontSize: 14, fontWeight: 600, color: "#EEEEEE", lineHeight: 1.2 },
-  logoSub: { fontSize: 10, color: "#888", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" },
-  nav: { display: "flex", gap: 2 },
-  navBtn: { padding: "6px 14px", borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#666", fontFamily: "inherit" },
-  navBtnActive: { background: "#1A1A1A", color: "#EEEEEE" },
-  backBtn: { padding: "6px 14px", borderRadius: 6, border: "1px solid #222", background: "transparent", cursor: "pointer", fontSize: 13, color: "#666", fontFamily: "inherit" },
-  main: { maxWidth: 680, margin: "40px auto", padding: "0 16px 80px" },
-  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginBottom: 36, paddingTop: 8 },
-  heroLogo: { width: 88, height: 88, borderRadius: "50%", objectFit: "cover", border: "1px solid #222" },
-  heroTitle: { fontSize: 26, fontWeight: 700, color: "#EEEEEE", letterSpacing: "-0.02em", margin: 0, textAlign: "center" },
-  heroTagline: { fontSize: 12, color: "#555", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 },
-  phoneLink: { display: "flex", alignItems: "center", gap: 7, padding: "9px 18px", borderRadius: 8, border: "1px solid #222", background: "#111", color: "#EEEEEE", fontSize: 15, fontWeight: 600, textDecoration: "none", marginTop: 2 },
+  logoImg: { height: 32, width: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid #1E1E1E" },
+  logoName: { fontSize: 14, fontWeight: 700, color: "#F97316", lineHeight: 1.2, letterSpacing: "-0.01em" },
+  logoSub: { fontSize: 9, color: "#3A3A3A", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" },
+  nav: { display: "flex", height: "100%" },
+  navBtn: { padding: "0 18px", border: "none", background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#4A4A4A", fontFamily: "inherit", borderBottom: "2px solid transparent", display: "flex", alignItems: "center", marginBottom: -1 },
+  navBtnActive: { color: "#EEEEEE", borderBottomColor: "#F97316" },
+  backBtn: { padding: "7px 16px", borderRadius: 7, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 13, color: "#555", fontFamily: "inherit" },
+  main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
+
+  // Hero — dot grid background, big bold typography
+  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 14, padding: "64px 24px 52px", marginBottom: 36, backgroundImage: "radial-gradient(circle, #1A1A1A 1px, transparent 1px)", backgroundSize: "24px 24px", borderRadius: 16, position: "relative" },
+  heroLabel: { fontSize: 10, fontWeight: 700, color: "#F97316", letterSpacing: "0.22em", textTransform: "uppercase", margin: 0 },
+  heroLogo: { width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: "2px solid #1E1E1E" },
+  heroTitle: { fontSize: 46, fontWeight: 800, color: "#EEEEEE", letterSpacing: "-0.035em", margin: 0, textAlign: "center", lineHeight: 1.05 },
+  heroStats: { fontSize: 12, color: "#4A4A4A", fontWeight: 500, letterSpacing: "0.05em", margin: 0, textAlign: "center" },
+  phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 8, border: "1px solid #1E1E1E", background: "#0C0C0C", color: "#EEEEEE", fontSize: 15, fontWeight: 600, textDecoration: "none", marginTop: 4 },
   socialRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" },
-  socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 7, border: "1px solid #1E1E1E", background: "#0E0E0E", color: "#777", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit" },
+  socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, border: "1px solid #161616", background: "transparent", color: "#4A4A4A", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit" },
   footer: { textAlign: "center", paddingBottom: 28 },
   adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1C1C1C", fontFamily: "inherit" },
-  card: { background: "#111", border: "1px solid #1E1E1E", borderRadius: 12, padding: "32px 28px" },
-  stepBar: { display: "flex", justifyContent: "space-between", marginBottom: 32, position: "relative" },
-  stepItem: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flex: 1 },
-  stepDot: { width: 28, height: 28, borderRadius: "50%", border: "1px solid #2A2A2A", background: "#111", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, color: "#444", zIndex: 1 },
-  stepActive: { border: "1px solid #F97316", color: "#F97316" },
-  stepDone: { background: "#F97316", border: "1px solid #F97316", color: "#fff" },
-  stepLabel: { fontSize: 11, color: "#444", fontWeight: 500, textAlign: "center" },
+
+  // Card — orange top accent border
+  card: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderTop: "2px solid #F97316", borderRadius: 12, padding: "32px 28px" },
+
+  // Step progress bar with connecting line
+  stepBar: { display: "flex", justifyContent: "space-between", marginBottom: 36, position: "relative" },
+  stepLine: { position: "absolute", top: 12, left: "calc(12.5% + 14px)", right: "calc(12.5% + 14px)", height: 1, background: "#1A1A1A" },
+  stepItem: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flex: 1, position: "relative", zIndex: 1 },
+  stepDot: { width: 26, height: 26, borderRadius: "50%", border: "1px solid #1E1E1E", background: "#0C0C0C", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#2E2E2E" },
+  stepActive: { border: "2px solid #F97316", color: "#F97316" },
+  stepDone: { background: "#F97316", border: "2px solid #F97316", color: "#fff" },
+  stepLabel: { fontSize: 11, color: "#2E2E2E", fontWeight: 500, textAlign: "center" },
   stepLabelActive: { color: "#EEEEEE" },
-  formSection: { display: "flex", flexDirection: "column", gap: 20 },
-  sectionTitle: { fontSize: 20, fontWeight: 700, color: "#EEEEEE", margin: "0 0 4px" },
-  fieldGroup: { display: "flex", flexDirection: "column", gap: 6 },
-  label: { fontSize: 13, fontWeight: 500, color: "#888" },
-  input: { padding: "10px 12px", border: "1px solid #222", borderRadius: 8, fontSize: 14, fontFamily: "inherit", outline: "none", transition: "border-color 0.15s", boxSizing: "border-box", width: "100%", background: "#0C0C0C", color: "#EEEEEE" },
+
+  // Form
+  formSection: { display: "flex", flexDirection: "column", gap: 22 },
+  sectionTitle: { fontSize: 20, fontWeight: 700, color: "#EEEEEE", margin: "0 0 4px", letterSpacing: "-0.02em" },
+  fieldGroup: { display: "flex", flexDirection: "column", gap: 7 },
+  label: { fontSize: 10, fontWeight: 700, color: "#4A4A4A", letterSpacing: "0.1em", textTransform: "uppercase" },
+  input: { padding: "11px 14px", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box", width: "100%", background: "#080808", color: "#EEEEEE" },
+
+  // Service cards — inset left orange accent on selection
   serviceGrid: { display: "flex", flexDirection: "column", gap: 6 },
-  serviceCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", border: "1px solid #1E1E1E", borderRadius: 8, background: "#0E0E0E", cursor: "pointer", fontFamily: "inherit", textAlign: "left" },
-  serviceCardActive: { border: "1px solid #F97316", background: "#111" },
+  serviceCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 18px", border: "1px solid #161616", borderRadius: 8, background: "#080808", cursor: "pointer", fontFamily: "inherit", textAlign: "left", boxShadow: "inset 4px 0 0 transparent" },
+  serviceCardActive: { border: "1px solid #252525", background: "#0C0C0C", boxShadow: "inset 4px 0 0 #F97316" },
   serviceName: { fontSize: 14, fontWeight: 600, color: "#EEEEEE" },
   serviceMeta: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 },
-  servicePrice: { fontSize: 15, fontWeight: 700, color: "#F97316" },
-  serviceDuration: { fontSize: 12, color: "#555" },
-  vehicleToggle: { display: "flex", gap: 8 },
-  vehicleBtn: { flex: 1, padding: "10px 16px", border: "1px solid #1E1E1E", borderRadius: 8, background: "#0E0E0E", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#555", fontFamily: "inherit" },
-  vehicleBtnActive: { border: "1px solid #F97316", background: "#111", color: "#EEEEEE" },
-  slotGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 6 },
-  slotCard: { padding: "12px 14px", border: "1px solid #1E1E1E", borderRadius: 8, background: "#0E0E0E", cursor: "pointer", textAlign: "left", fontFamily: "inherit", display: "flex", flexDirection: "column", gap: 4 },
-  slotCardActive: { border: "1px solid #F97316", background: "#111" },
+  servicePrice: { fontSize: 20, fontWeight: 800, color: "#F97316", letterSpacing: "-0.02em" },
+  serviceDuration: { fontSize: 10, color: "#3A3A3A", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" },
+
+  // Vehicle toggle — segmented control
+  vehicleToggle: { display: "flex", background: "#080808", border: "1px solid #1A1A1A", borderRadius: 9, padding: 3 },
+  vehicleBtn: { flex: 1, padding: "10px 16px", border: "none", borderRadius: 7, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#333", fontFamily: "inherit" },
+  vehicleBtnActive: { background: "#171717", color: "#EEEEEE" },
+
+  // Time slots — inset left orange accent on selection
+  slotGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: 6 },
+  slotCard: { padding: "14px 16px", border: "1px solid #161616", borderRadius: 8, background: "#080808", cursor: "pointer", textAlign: "left", fontFamily: "inherit", display: "flex", flexDirection: "column", gap: 4, boxShadow: "inset 4px 0 0 transparent" },
+  slotCardActive: { border: "1px solid #252525", background: "#0C0C0C", boxShadow: "inset 4px 0 0 #F97316" },
   slotDate: { fontSize: 13, fontWeight: 600, color: "#EEEEEE" },
-  slotTime: { fontSize: 12, color: "#555" },
-  confirmCard: { border: "1px solid #1E1E1E", borderRadius: 8, overflow: "hidden" },
-  confirmRow: { display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #141414" },
-  confirmLabel: { fontSize: 13, color: "#666", fontWeight: 500 },
+  slotTime: { fontSize: 11, color: "#F97316", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" },
+
+  // Confirm card
+  confirmCard: { border: "1px solid #161616", borderRadius: 8, overflow: "hidden" },
+  confirmRow: { display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #0F0F0F" },
+  confirmLabel: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase" },
   confirmValue: { fontSize: 13, color: "#EEEEEE", fontWeight: 600, textAlign: "right", maxWidth: "60%" },
+
+  // Buttons
   btnRow: { display: "flex", gap: 10, justifyContent: "flex-end" },
-  btnPrimary: { padding: "11px 24px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" },
-  btnSecondary: { padding: "11px 20px", background: "transparent", color: "#888", border: "1px solid #222", borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" },
-  btnDisabled: { opacity: 0.3, cursor: "not-allowed" },
-  errorBox: { background: "#1A0000", border: "1px solid #3A0000", color: "#FC8181", padding: "12px 14px", borderRadius: 8, fontSize: 13 },
-  successIcon: { width: 52, height: 52, borderRadius: "50%", background: "#111", border: "1px solid #2A2A2A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, margin: "0 auto 20px", color: "#F97316" },
-  successTitle: { textAlign: "center", fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: "0 0 12px" },
-  successBody: { textAlign: "center", fontSize: 14, color: "#888", margin: "0 0 8px", lineHeight: 1.6 },
-  successSub: { textAlign: "center", fontSize: 13, color: "#555", margin: "0 0 24px" },
-  emptyMsg: { textAlign: "center", color: "#444", padding: "40px 0", fontSize: 14 },
-  galleryHero: { textAlign: "center", marginBottom: 28, paddingTop: 4 },
-  galleryHeroTitle: { fontSize: 26, fontWeight: 700, color: "#EEEEEE", margin: "0 0 6px", letterSpacing: "-0.02em" },
-  galleryHeroSub: { fontSize: 12, color: "#555", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 },
+  btnPrimary: { padding: "12px 24px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.09em", textTransform: "uppercase" },
+  btnSecondary: { padding: "12px 20px", background: "transparent", color: "#4A4A4A", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.04em" },
+  btnDisabled: { opacity: 0.22, cursor: "not-allowed" },
+  errorBox: { background: "#180000", border: "1px solid #380000", color: "#FC8181", padding: "12px 14px", borderRadius: 8, fontSize: 13 },
+
+  // Success
+  successIcon: { width: 56, height: 56, borderRadius: "50%", background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, margin: "0 auto 20px", color: "#fff", fontWeight: 700 },
+  successTitle: { textAlign: "center", fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: "0 0 12px", letterSpacing: "-0.02em" },
+  successBody: { textAlign: "center", fontSize: 14, color: "#777", margin: "0 0 8px", lineHeight: 1.6 },
+  successSub: { textAlign: "center", fontSize: 13, color: "#3A3A3A", margin: "0 0 24px" },
+  emptyMsg: { textAlign: "center", color: "#2E2E2E", padding: "40px 0", fontSize: 14 },
+
+  // Gallery & section headers
+  galleryHero: { textAlign: "center", marginBottom: 32, paddingTop: 36 },
+  galleryHeroTitle: { fontSize: 34, fontWeight: 800, color: "#EEEEEE", margin: "0 0 8px", letterSpacing: "-0.03em" },
+  galleryHeroSub: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", margin: 0 },
   photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(195px, 1fr))", gap: 8 },
-  photoLink: { display: "block", borderRadius: 8, overflow: "hidden", aspectRatio: "1", border: "1px solid #1A1A1A" },
+  photoLink: { display: "block", borderRadius: 8, overflow: "hidden", aspectRatio: "1", border: "1px solid #141414" },
   photoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
-  floatingWrap: { position: "fixed", right: 24, top: "50%", marginTop: -80, zIndex: 5, width: 220 },
-  floatingCard: { background: "#111", border: "1px solid #1E1E1E", borderRadius: 10, padding: "14px 16px" },
-  floatingStars: { color: "#F97316", fontSize: 14, letterSpacing: 2, marginBottom: 8 },
-  floatingComment: { fontSize: 12, color: "#999", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
-  floatingName: { fontSize: 11, color: "#555", fontWeight: 500 },
-  reviewStats: { background: "#111", border: "1px solid #1E1E1E", borderRadius: 12, padding: "24px 28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
+
+  // Floating reviews — left orange border accent
+  floatingWrap: { position: "fixed", right: 24, top: "50%", marginTop: -80, zIndex: 5, width: 224 },
+  floatingCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 10, padding: "14px 16px" },
+  floatingStars: { color: "#F97316", fontSize: 13, letterSpacing: 2, marginBottom: 8 },
+  floatingComment: { fontSize: 12, color: "#666", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
+  floatingName: { fontSize: 10, color: "#333", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" },
+
+  // Reviews
+  reviewStats: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, padding: "28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
   reviewAvgBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 80 },
-  reviewAvgNum: { fontSize: 48, fontWeight: 700, color: "#EEEEEE", lineHeight: 1 },
+  reviewAvgNum: { fontSize: 56, fontWeight: 800, color: "#EEEEEE", lineHeight: 1, letterSpacing: "-0.04em" },
   reviewAvgStars: { display: "flex", gap: 2 },
-  reviewCount: { fontSize: 12, color: "#555", fontWeight: 500, marginTop: 2 },
-  reviewBars: { flex: 1, display: "flex", flexDirection: "column", gap: 7, minWidth: 200 },
+  reviewCount: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.1em" },
+  reviewBars: { flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 200 },
   reviewBarRow: { display: "flex", alignItems: "center", gap: 10 },
-  reviewBarLabel: { fontSize: 12, color: "#555", width: 24, textAlign: "right", flexShrink: 0 },
-  reviewBarTrack: { flex: 1, height: 6, background: "#1A1A1A", borderRadius: 99, overflow: "hidden" },
+  reviewBarLabel: { fontSize: 11, color: "#3A3A3A", width: 24, textAlign: "right", flexShrink: 0, fontWeight: 600 },
+  reviewBarTrack: { flex: 1, height: 4, background: "#141414", borderRadius: 99, overflow: "hidden" },
   reviewBarFill: { height: "100%", background: "#F97316", borderRadius: 99, transition: "width 0.6s ease" },
-  reviewBarCount: { fontSize: 12, color: "#444", width: 20, flexShrink: 0 },
-  starPicker: { display: "flex", gap: 2, marginTop: 4 },
-  starPickBtn: { background: "none", border: "none", cursor: "pointer", padding: "2px 6px", lineHeight: 1 },
+  reviewBarCount: { fontSize: 11, color: "#2E2E2E", width: 20, flexShrink: 0 },
+  starPicker: { display: "flex", gap: 0, marginTop: 4 },
+  starPickBtn: { background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 },
   anonRow: { display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginTop: 6 },
-  reviewCard: { background: "#111", border: "1px solid #1E1E1E", borderRadius: 10, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 },
+  reviewCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 },
   reviewCardTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" },
-  reviewerName: { fontSize: 14, fontWeight: 600, color: "#EEEEEE", marginBottom: 4 },
-  reviewDate: { fontSize: 12, color: "#444", flexShrink: 0 },
-  reviewComment: { fontSize: 14, color: "#888", lineHeight: 1.6, margin: 0 },
+  reviewerName: { fontSize: 14, fontWeight: 700, color: "#EEEEEE", marginBottom: 4 },
+  reviewDate: { fontSize: 10, color: "#2E2E2E", flexShrink: 0, fontWeight: 600, letterSpacing: "0.04em" },
+  reviewComment: { fontSize: 14, color: "#5A5A5A", lineHeight: 1.6, margin: 0 },
+
+  // Admin
   adminTopBar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  adminTitle: { fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: 0 },
-  refreshBtn: { padding: "7px 14px", background: "transparent", border: "1px solid #222", borderRadius: 7, cursor: "pointer", fontSize: 13, color: "#666", fontFamily: "inherit" },
+  adminTitle: { fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: 0, letterSpacing: "-0.02em" },
+  refreshBtn: { padding: "7px 14px", background: "transparent", border: "1px solid #1A1A1A", borderRadius: 7, cursor: "pointer", fontSize: 11, color: "#444", fontFamily: "inherit", letterSpacing: "0.04em" },
   statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 },
-  statCard: { background: "#111", border: "1px solid #1E1E1E", borderRadius: 10, padding: "16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
-  statNum: { fontSize: 28, fontWeight: 700 },
-  statLabel: { fontSize: 11, color: "#555", textTransform: "capitalize", fontWeight: 500, letterSpacing: "0.05em" },
+  statCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "18px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
+  statNum: { fontSize: 30, fontWeight: 800, letterSpacing: "-0.03em" },
+  statLabel: { fontSize: 9, color: "#3A3A3A", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em" },
   filterRow: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" },
-  filterBtn: { padding: "5px 14px", borderRadius: 20, border: "1px solid #1E1E1E", background: "transparent", cursor: "pointer", fontSize: 12, fontWeight: 500, color: "#555", textTransform: "capitalize", fontFamily: "inherit" },
-  filterBtnActive: { background: "#111", color: "#EEEEEE", borderColor: "#333" },
+  filterBtn: { padding: "5px 14px", borderRadius: 20, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#3A3A3A", textTransform: "capitalize", fontFamily: "inherit", letterSpacing: "0.04em" },
+  filterBtnActive: { background: "#161616", color: "#EEEEEE", borderColor: "#252525" },
   bookingList: { display: "flex", flexDirection: "column", gap: 10 },
-  bookingCard: { background: "#111", border: "1px solid #1E1E1E", borderRadius: 10, padding: "16px 20px" },
+  bookingCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "16px 20px" },
   bookingTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
-  bookingName: { fontSize: 15, fontWeight: 600, color: "#EEEEEE", marginBottom: 2 },
-  bookingDate: { fontSize: 13, color: "#555" },
-  badge: { padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, textTransform: "capitalize" },
-  bookingBody: { display: "flex", flexDirection: "column", gap: 4, marginBottom: 14, paddingBottom: 14, borderBottom: "1px solid #161616" },
-  bookingDetail: { fontSize: 13, color: "#777" },
+  bookingName: { fontSize: 15, fontWeight: 700, color: "#EEEEEE", marginBottom: 2 },
+  bookingDate: { fontSize: 12, color: "#3A3A3A" },
+  badge: { padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" },
+  bookingBody: { display: "flex", flexDirection: "column", gap: 4, marginBottom: 14, paddingBottom: 14, borderBottom: "1px solid #111" },
+  bookingDetail: { fontSize: 13, color: "#5A5A5A" },
   bookingActions: { display: "flex", alignItems: "center", gap: 10 },
-  actionLabel: { fontSize: 12, color: "#444", fontWeight: 500 },
-  statusSelect: { padding: "6px 10px", border: "1px solid #222", borderRadius: 6, fontSize: 13, fontFamily: "inherit", cursor: "pointer", background: "#0C0C0C", color: "#EEEEEE" },
-  adminTabRow: { display: "flex", marginBottom: 24, borderBottom: "1px solid #1A1A1A" },
-  adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#555", fontFamily: "inherit" },
+  actionLabel: { fontSize: 9, color: "#2E2E2E", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" },
+  statusSelect: { padding: "6px 10px", border: "1px solid #1A1A1A", borderRadius: 6, fontSize: 13, fontFamily: "inherit", cursor: "pointer", background: "#080808", color: "#EEEEEE" },
+  adminTabRow: { display: "flex", marginBottom: 24, borderBottom: "1px solid #141414" },
+  adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#3A3A3A", fontFamily: "inherit", letterSpacing: "0.08em", textTransform: "uppercase" },
   adminTabActive: { color: "#EEEEEE", borderBottomColor: "#F97316" },
-  uploadCard: { background: "#111", border: "1px solid #1E1E1E", borderRadius: 10, padding: 20, display: "flex", flexDirection: "column", gap: 14 },
-  uploadLabel: { fontSize: 13, fontWeight: 500, color: "#888", margin: 0 },
-  uploadZone: { display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 8, border: "1px dashed #2A2A2A", overflow: "hidden", minHeight: 160 },
+  uploadCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: 20, display: "flex", flexDirection: "column", gap: 14 },
+  uploadLabel: { fontSize: 10, fontWeight: 700, color: "#4A4A4A", margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" },
+  uploadZone: { display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 8, border: "1px dashed #1E1E1E", overflow: "hidden", minHeight: 160 },
   uploadEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: 32 },
-  uploadIcon: { fontSize: 28, color: "#F97316" },
+  uploadIcon: { fontSize: 24, color: "#F97316" },
   uploadPreview: { width: "100%", maxHeight: 260, objectFit: "contain", display: "block" },
   adminPhotoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 },
   adminPhotoCard: { position: "relative", borderRadius: 8, overflow: "hidden", aspectRatio: "1" },
   adminPhotoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
-  deletePhotoBtn: { position: "absolute", top: 6, right: 6, width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.8)", border: "1px solid #333", color: "#ccc", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit", lineHeight: 1 },
+  deletePhotoBtn: { position: "absolute", top: 6, right: 6, width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.85)", border: "1px solid #1E1E1E", color: "#bbb", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit", lineHeight: 1 },
 };
