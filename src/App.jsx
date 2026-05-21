@@ -60,20 +60,9 @@ export default function App() {
         <div style={s.logo}>
           <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.logoImg} />
         </div>
-        <nav style={s.nav}>
-          <button
-            style={{ ...s.navBtn, ...(view === "client" ? s.navBtnActive : {}) }}
-            onClick={() => setView("client")}
-          >
-            Book
-          </button>
-          <button
-            style={{ ...s.navBtn, ...(view === "admin" ? s.navBtnActive : {}) }}
-            onClick={() => setView("admin")}
-          >
-            Admin
-          </button>
-        </nav>
+        {view === "admin" && (
+          <button style={s.backBtn} onClick={() => setView("client")}>← Back to booking</button>
+        )}
       </header>
 
       <main style={s.main}>
@@ -86,6 +75,12 @@ export default function App() {
         {view === "admin" && !adminAuthed && <AdminLogin onAuth={() => setAdminAuthed(true)} />}
         {view === "admin" && adminAuthed && <AdminView />}
       </main>
+
+      {view === "client" && (
+        <footer style={s.footer}>
+          <button style={s.adminLink} onClick={() => setView("admin")}>admin</button>
+        </footer>
+      )}
     </div>
   );
 }
@@ -445,9 +440,9 @@ const s = {
   logoImg: { height: 44, width: 44, borderRadius: 8, objectFit: "cover" },
   hero: { display: "flex", justifyContent: "center", marginBottom: 24 },
   heroLogo: { width: 160, height: 160, borderRadius: 20, objectFit: "cover", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" },
-  nav: { display: "flex", gap: 4 },
-  navBtn: { padding: "6px 16px", borderRadius: 6, border: "1px solid #2A2A2A", background: "transparent", cursor: "pointer", fontSize: 14, fontWeight: 500, color: "#9CA3AF" },
-  navBtnActive: { background: "#1C1007", color: "#F97316", borderColor: "#7C2D12" },
+  backBtn: { padding: "6px 14px", borderRadius: 6, border: "1px solid #2A2A2A", background: "transparent", cursor: "pointer", fontSize: 13, color: "#6B7280", fontFamily: "inherit" },
+  footer: { textAlign: "center", paddingBottom: 24 },
+  adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#2A2A2A", fontFamily: "inherit", letterSpacing: "0.05em" },
   main: { maxWidth: 680, margin: "32px auto", padding: "0 16px 64px" },
   card: { background: "#1A1A1A", border: "1px solid #2A2A2A", borderRadius: 12, padding: "32px 28px" },
   stepBar: { display: "flex", justifyContent: "space-between", marginBottom: 32, position: "relative" },
