@@ -104,6 +104,12 @@ export default function App() {
           </div>
         )}
         {view === "client" && (
+          <div style={s.bookingLabel}>
+            <span style={s.bookingLabelText}>Book a Detail</span>
+          </div>
+        )}
+        {view === "client" && <ClientView />}
+        {view === "client" && (
           <div style={s.valueRow}>
             <div style={s.valueItem}>
               <div style={s.valueIconWrap}>
@@ -137,7 +143,6 @@ export default function App() {
           </div>
         )}
         {view === "client" && <ShareBanner />}
-        {view === "client" && <ClientView />}
         {view === "client" && <FloatingReviews />}
         {view === "gallery" && <GalleryView />}
         {view === "reviews" && <ReviewsView />}
@@ -884,8 +889,12 @@ const s = {
   footer: { textAlign: "center", paddingBottom: 28 },
   adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1C1C1C", fontFamily: "inherit" },
 
+  // Booking section label
+  bookingLabel: { marginBottom: 12 },
+  bookingLabelText: { fontSize: 11, fontWeight: 700, color: "#F97316", letterSpacing: "0.14em", textTransform: "uppercase" },
+
   // Value props strip
-  valueRow: { display: "flex", alignItems: "stretch", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginBottom: 28, overflow: "hidden" },
+  valueRow: { display: "flex", alignItems: "stretch", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginTop: 28, marginBottom: 16, overflow: "hidden" },
   valueItem: { flex: 1, display: "flex", alignItems: "center", gap: 14, padding: "20px 22px" },
   valueIconWrap: { width: 38, height: 38, borderRadius: 9, background: "rgba(249,115,22,0.07)", border: "1px solid rgba(249,115,22,0.14)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 3 },
@@ -893,7 +902,7 @@ const s = {
   valueSep: { width: 1, background: "#141414", flexShrink: 0 },
 
   // Share banner
-  shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 12, padding: "22px 26px", marginBottom: 28, flexWrap: "wrap" },
+  shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 12, padding: "22px 26px", marginBottom: 0, flexWrap: "wrap" },
   shareTitle: { fontSize: 16, fontWeight: 700, color: "#EEEEEE", marginBottom: 5, letterSpacing: "-0.01em" },
   shareSub: { fontSize: 12, color: "#3A3A3A" },
   shareBtn: { display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", flexShrink: 0 },
