@@ -934,7 +934,7 @@ const s = {
   valueSep: {},
 
   // Share banner
-  shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 12, padding: "22px 26px", marginBottom: 0, flexWrap: "wrap" },
+  shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 12, padding: "22px 26px", marginTop: 32, marginBottom: 0, flexWrap: "wrap" },
   shareTitle: { fontSize: 16, fontWeight: 700, color: "#EEEEEE", marginBottom: 5, letterSpacing: "-0.01em" },
   shareSub: { fontSize: 12, color: "#3A3A3A" },
   shareBtn: { display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", flexShrink: 0 },
