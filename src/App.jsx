@@ -67,8 +67,13 @@ export default function App() {
             <div style={s.logoSub}>Auto Detailing</div>
           </div>
         </div>
-        {view === "admin" && (
-          <button style={s.backBtn} onClick={() => setView("client")}>← Back to booking</button>
+        {view !== "admin" ? (
+          <nav style={s.nav}>
+            <button style={{ ...s.navBtn, ...(view === "client" ? s.navBtnActive : {}) }} onClick={() => setView("client")}>Book</button>
+            <button style={{ ...s.navBtn, ...(view === "gallery" ? s.navBtnActive : {}) }} onClick={() => setView("gallery")}>Gallery</button>
+          </nav>
+        ) : (
+          <button style={s.backBtn} onClick={() => setView("client")}>← Back</button>
         )}
       </header>
 
@@ -83,11 +88,12 @@ export default function App() {
           </div>
         )}
         {view === "client" && <ClientView />}
+        {view === "gallery" && <GalleryView />}
         {view === "admin" && !adminAuthed && <AdminLogin onAuth={() => setAdminAuthed(true)} />}
         {view === "admin" && adminAuthed && <AdminView />}
       </main>
 
-      {view === "client" && (
+      {view !== "admin" && (
         <footer style={s.footer}>
           <button style={s.adminLink} onClick={() => setView("admin")}>admin</button>
         </footer>
@@ -339,7 +345,131 @@ function AdminLogin({ onAuth }) {
   );
 }
 
+function GalleryView() {
+  const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.storage.from("gallery").list("", { sortBy: { column: "created_at", order: "desc" } })
+      .then(({ data }) => {
+        if (data) {
+          setPhotos(data.filter(f => f.name !== ".emptyFolderPlaceholder").map(f => ({
+            name: f.name,
+            url: supabase.storage.from("gallery").getPublicUrl(f.name).data.publicUrl,
+          })));
+        }
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div>
+      <div style={s.galleryHero}>
+        <h2 style={s.galleryHeroTitle}>Our Work</h2>
+        <p style={s.galleryHeroSub}>Before & After · Premium Results</p>
+      </div>
+      {loading ? (
+        <p style={s.emptyMsg}>Loading...</p>
+      ) : photos.length === 0 ? (
+        <p style={s.emptyMsg}>No photos yet — check back soon.</p>
+      ) : (
+        <div style={s.photoGrid}>
+          {photos.map(ph => (
+            <a key={ph.name} href={ph.url} target="_blank" rel="noopener noreferrer" style={s.photoLink}>
+              <img src={ph.url} alt="Detailing work" style={s.photoImg} />
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PhotoManager() {
+  const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const fetchPhotos = async () => {
+    const { data } = await supabase.storage.from("gallery").list("", { sortBy: { column: "created_at", order: "desc" } });
+    if (data) {
+      setPhotos(data.filter(f => f.name !== ".emptyFolderPlaceholder").map(f => ({
+        name: f.name,
+        url: supabase.storage.from("gallery").getPublicUrl(f.name).data.publicUrl,
+      })));
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchPhotos(); }, []);
+
+  const handleFile = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+  };
+
+  const upload = async () => {
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    await supabase.storage.from("gallery").upload(`${Date.now()}.${ext}`, file);
+    setFile(null);
+    setPreview(null);
+    setUploading(false);
+    fetchPhotos();
+  };
+
+  const remove = async (name) => {
+    await supabase.storage.from("gallery").remove([name]);
+    setPhotos(p => p.filter(ph => ph.name !== name));
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={s.uploadCard}>
+        <p style={s.uploadLabel}>Add photo</p>
+        <label style={s.uploadZone}>
+          {preview ? (
+            <img src={preview} style={s.uploadPreview} alt="Preview" />
+          ) : (
+            <div style={s.uploadEmpty}>
+              <span style={s.uploadIcon}>↑</span>
+              <span style={{ fontSize: 13, color: "#6B7280" }}>Click to select a photo</span>
+            </div>
+          )}
+          <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
+        </label>
+        {file && (
+          <button style={s.btnPrimary} onClick={upload} disabled={uploading}>
+            {uploading ? "Uploading..." : "Upload photo"}
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <p style={s.emptyMsg}>Loading...</p>
+      ) : photos.length === 0 ? (
+        <p style={s.emptyMsg}>No photos uploaded yet.</p>
+      ) : (
+        <div style={s.adminPhotoGrid}>
+          {photos.map(ph => (
+            <div key={ph.name} style={s.adminPhotoCard}>
+              <img src={ph.url} alt="" style={s.adminPhotoImg} />
+              <button style={s.deletePhotoBtn} onClick={() => remove(ph.name)}>✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AdminView() {
+  const [tab, setTab] = useState("bookings");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -372,11 +502,21 @@ function AdminView() {
   return (
     <div>
       <div style={s.adminTopBar}>
-        <h1 style={s.adminTitle}>Bookings</h1>
-        <button style={s.refreshBtn} onClick={fetchBookings}>↻ Refresh</button>
+        <h1 style={s.adminTitle}>Admin</h1>
+        {tab === "bookings" && <button style={s.refreshBtn} onClick={fetchBookings}>↻ Refresh</button>}
       </div>
 
-      <div style={s.statsRow}>
+      <div style={s.adminTabRow}>
+        {["bookings", "gallery"].map(t => (
+          <button key={t} style={{ ...s.adminTab, ...(tab === t ? s.adminTabActive : {}) }} onClick={() => setTab(t)}>
+            {t === "bookings" ? "Bookings" : "Gallery Photos"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "gallery" && <PhotoManager />}
+
+      {tab === "bookings" && <><div style={s.statsRow}>
         {[["total", bookings.length, "#F97316"], ["pending", counts.pending || 0, "#FB923C"], ["confirmed", counts.confirmed || 0, "#60A5FA"], ["completed", counts.completed || 0, "#86EFAC"]].map(([label, count, color]) => (
           <div key={label} style={s.statCard}>
             <span style={{ ...s.statNum, color }}>{count}</span>
@@ -440,6 +580,7 @@ function AdminView() {
           })}
         </div>
       )}
+      </>}
     </div>
   );
 }
@@ -459,9 +600,31 @@ const s = {
   heroLogo: { width: 130, height: 130, borderRadius: "50%", objectFit: "cover", display: "block" },
   heroTitle: { fontSize: 24, fontWeight: 800, color: "#F9FAFB", letterSpacing: "-0.02em", margin: 0, textAlign: "center" },
   heroTagline: { fontSize: 11, color: "#F97316", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", margin: 0 },
+  nav: { display: "flex", gap: 4 },
+  navBtn: { padding: "7px 18px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#9CA3AF", fontFamily: "inherit" },
+  navBtnActive: { background: "rgba(249,115,22,0.15)", color: "#F97316", borderColor: "rgba(249,115,22,0.35)" },
   backBtn: { padding: "6px 14px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(10px)", cursor: "pointer", fontSize: 13, color: "#9CA3AF", fontFamily: "inherit" },
   footer: { textAlign: "center", paddingBottom: 28, position: "relative", zIndex: 1 },
   adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1A1A1A", fontFamily: "inherit", letterSpacing: "0.05em" },
+  galleryHero: { textAlign: "center", marginBottom: 28, paddingTop: 4 },
+  galleryHeroTitle: { fontSize: 28, fontWeight: 800, color: "#F9FAFB", margin: "0 0 8px", letterSpacing: "-0.02em" },
+  galleryHeroSub: { fontSize: 11, color: "#F97316", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", margin: 0 },
+  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(195px, 1fr))", gap: 10 },
+  photoLink: { display: "block", borderRadius: 12, overflow: "hidden", aspectRatio: "1", border: "1px solid rgba(255,255,255,0.07)" },
+  photoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
+  adminTabRow: { display: "flex", gap: 0, marginBottom: 24, borderBottom: "1px solid rgba(255,255,255,0.07)" },
+  adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#6B7280", fontFamily: "inherit" },
+  adminTabActive: { color: "#F97316", borderBottomColor: "#F97316" },
+  uploadCard: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(249,115,22,0.15)", borderRadius: 14, padding: 20, display: "flex", flexDirection: "column", gap: 14 },
+  uploadLabel: { fontSize: 13, fontWeight: 700, color: "#D1D5DB", margin: 0 },
+  uploadZone: { display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 10, border: "1.5px dashed rgba(249,115,22,0.25)", overflow: "hidden", minHeight: 160 },
+  uploadEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: 32 },
+  uploadIcon: { fontSize: 30, color: "#F97316" },
+  uploadPreview: { width: "100%", maxHeight: 260, objectFit: "contain", display: "block" },
+  adminPhotoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 },
+  adminPhotoCard: { position: "relative", borderRadius: 10, overflow: "hidden", aspectRatio: "1" },
+  adminPhotoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
+  deletePhotoBtn: { position: "absolute", top: 6, right: 6, width: 26, height: 26, borderRadius: "50%", background: "rgba(0,0,0,0.75)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit", lineHeight: 1 },
   main: { maxWidth: 680, margin: "32px auto", padding: "0 16px 64px", position: "relative", zIndex: 1 },
   card: { background: "rgba(18,18,18,0.75)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", border: "1px solid rgba(249,115,22,0.12)", borderRadius: 16, padding: "32px 28px" },
   stepBar: { display: "flex", justifyContent: "space-between", marginBottom: 32, position: "relative" },
