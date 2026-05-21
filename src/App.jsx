@@ -62,6 +62,10 @@ export default function App() {
       <header style={s.header}>
         <div style={s.logo}>
           <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.logoImg} />
+          <div>
+            <div style={s.logoName}>C&H Elite</div>
+            <div style={s.logoSub}>Auto Detailing</div>
+          </div>
         </div>
         {view === "admin" && (
           <button style={s.backBtn} onClick={() => setView("client")}>← Back to booking</button>
@@ -71,7 +75,11 @@ export default function App() {
       <main style={s.main}>
         {view === "client" && (
           <div style={s.hero}>
-            <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
+            <div style={s.heroImgRing}>
+              <img src="/logo.png" alt="C&H Elite Auto Detailing" style={s.heroLogo} />
+            </div>
+            <h1 style={s.heroTitle}>C&H Elite Auto Detailing</h1>
+            <p style={s.heroTagline}>Premium · Professional · Mobile</p>
           </div>
         )}
         {view === "client" && <ClientView />}
@@ -442,10 +450,15 @@ const s = {
   orb2: { position: "fixed", bottom: "-20%", right: "-10%", width: 650, height: 650, background: "radial-gradient(circle, rgba(249,115,22,0.18) 0%, transparent 65%)", filter: "blur(80px)", pointerEvents: "none", zIndex: 0 },
   orb3: { position: "fixed", top: "45%", left: "55%", width: 400, height: 400, background: "radial-gradient(circle, rgba(180,50,0,0.14) 0%, transparent 65%)", filter: "blur(70px)", pointerEvents: "none", zIndex: 0 },
   header: { background: "rgba(6,6,6,0.8)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(249,115,22,0.1)", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60, position: "relative", zIndex: 10 },
-  logo: { display: "flex", alignItems: "center" },
-  logoImg: { height: 44, width: 44, borderRadius: 8, objectFit: "cover" },
-  hero: { display: "flex", justifyContent: "center", marginBottom: 28 },
-  heroLogo: { width: 170, height: 170, borderRadius: 24, objectFit: "cover", boxShadow: "0 0 60px rgba(249,115,22,0.3), 0 12px 40px rgba(0,0,0,0.6)" },
+  logo: { display: "flex", alignItems: "center", gap: 10 },
+  logoImg: { height: 38, width: 38, borderRadius: "50%", objectFit: "cover", border: "1.5px solid rgba(249,115,22,0.5)", flexShrink: 0 },
+  logoName: { fontSize: 14, fontWeight: 700, color: "#F9FAFB", lineHeight: 1.2 },
+  logoSub: { fontSize: 10, color: "#F97316", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" },
+  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginBottom: 32, paddingTop: 4 },
+  heroImgRing: { padding: 4, borderRadius: "50%", background: "linear-gradient(135deg, rgba(249,115,22,0.6), rgba(180,50,0,0.3))", boxShadow: "0 0 50px rgba(249,115,22,0.25), 0 0 100px rgba(249,115,22,0.1)" },
+  heroLogo: { width: 130, height: 130, borderRadius: "50%", objectFit: "cover", display: "block" },
+  heroTitle: { fontSize: 24, fontWeight: 800, color: "#F9FAFB", letterSpacing: "-0.02em", margin: 0, textAlign: "center" },
+  heroTagline: { fontSize: 11, color: "#F97316", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", margin: 0 },
   backBtn: { padding: "6px 14px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(10px)", cursor: "pointer", fontSize: 13, color: "#9CA3AF", fontFamily: "inherit" },
   footer: { textAlign: "center", paddingBottom: 28, position: "relative", zIndex: 1 },
   adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1A1A1A", fontFamily: "inherit", letterSpacing: "0.05em" },
