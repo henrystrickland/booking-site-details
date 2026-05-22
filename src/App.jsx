@@ -21,6 +21,19 @@ const WEEKLY_SLOTS = [
   { day: 3, label: "Wednesday", times: ["4:00 PM"] },
 ];
 
+function getPriceFromBooking(b) {
+  const svc = SERVICES.find(s => s.name === b.service_type);
+  if (!svc) return null;
+  const m = (b.notes || "").match(/\[vehicle:(sedan|suv)\]/);
+  const vehicle = m ? m[1] : "sedan";
+  return svc.prices[vehicle] ?? null;
+}
+
+function cleanNotes(notes) {
+  if (!notes) return null;
+  return notes.replace(/^\[vehicle:(sedan|suv)\]\n?/, "").trim() || null;
+}
+
 function getAvailableSlots() {
   const slots = [];
   const today = new Date();
@@ -301,7 +314,7 @@ function ClientView({ onBooked }) {
       service_type: form.service_type,
       booking_date: form.booking_date,
       booking_time: form.booking_time,
-      notes: form.notes,
+      notes: `[vehicle:${form.vehicle_type}]${form.notes ? "\n" + form.notes : ""}`,
       status: "pending",
     }]);
     setLoading(false);
@@ -794,11 +807,130 @@ function PhotoManager() {
   );
 }
 
+function AdminAddBooking({ onDone }) {
+  const [form, setForm] = useState({
+    client_name: "", client_phone: "", client_email: "",
+    vehicle_type: "sedan", service_type: "",
+    booking_date: new Date().toISOString().split("T")[0],
+    booking_time: "", notes: "", status: "completed",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const svc = SERVICES.find(sv => sv.name === form.service_type);
+  const price = svc ? svc.prices[form.vehicle_type] : null;
+
+  const submit = async () => {
+    if (!form.client_name || !form.service_type || !form.booking_date || !form.booking_time) {
+      setError("Name, service, date, and time are required.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    const { error: err } = await supabase.from("bookings").insert([{
+      client_name: form.client_name,
+      client_email: form.client_email || null,
+      client_phone: form.client_phone || null,
+      service_type: form.service_type,
+      booking_date: form.booking_date,
+      booking_time: form.booking_time,
+      notes: `[vehicle:${form.vehicle_type}]${form.notes ? "\n" + form.notes : ""}`,
+      status: form.status,
+    }]);
+    setLoading(false);
+    if (err) { setError("Something went wrong. Please try again."); return; }
+    onDone();
+  };
+
+  return (
+    <div style={s.card}>
+      <div style={s.formSection}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={s.sectionTitle}>Add Service</h2>
+          <button style={s.btnSecondary} onClick={onDone}>Cancel</button>
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Client name</label>
+          <input style={s.input} value={form.client_name} onChange={e => set("client_name", e.target.value)} placeholder="Jane Smith" />
+        </div>
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Phone <span style={{ color: "#3A3A3A", fontWeight: 400 }}>(optional)</span></label>
+          <input style={s.input} type="tel" value={form.client_phone} onChange={e => set("client_phone", e.target.value)} placeholder="(555) 000-0000" />
+        </div>
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Email <span style={{ color: "#3A3A3A", fontWeight: 400 }}>(optional)</span></label>
+          <input style={s.input} type="email" value={form.client_email} onChange={e => set("client_email", e.target.value)} placeholder="you@example.com" />
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Vehicle type</label>
+          <div style={s.vehicleToggle}>
+            {["sedan", "suv"].map(v => (
+              <button key={v} style={{ ...s.vehicleBtn, ...(form.vehicle_type === v ? s.vehicleBtnActive : {}) }} onClick={() => set("vehicle_type", v)}>
+                {v === "sedan" ? "Sedan" : "SUV / Truck"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Service</label>
+          <div style={s.serviceGrid}>
+            {SERVICES.map(sv => (
+              <button key={sv.id} style={{ ...s.serviceCard, ...(form.service_type === sv.name ? s.serviceCardActive : {}) }} onClick={() => set("service_type", sv.name)}>
+                <span style={s.serviceName}>{sv.name}</span>
+                <div style={s.serviceMeta}>
+                  <span style={s.servicePrice}>${sv.prices[form.vehicle_type]}</span>
+                  <span style={s.serviceDuration}>{sv.duration}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+          {price !== null && <div style={{ fontSize: 13, color: "#86EFAC", fontWeight: 700, marginTop: 6 }}>Price: ${price}</div>}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Date</label>
+            <input style={s.input} type="date" value={form.booking_date} onChange={e => set("booking_date", e.target.value)} />
+          </div>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Time</label>
+            <input style={s.input} value={form.booking_time} onChange={e => set("booking_time", e.target.value)} placeholder="e.g. 10:00 AM" />
+          </div>
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Status</label>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {["completed", "confirmed", "pending"].map(st => (
+              <button key={st} style={{ ...s.filterBtn, ...(form.status === st ? s.filterBtnActive : {}) }} onClick={() => set("status", st)}>{st}</button>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Notes <span style={{ color: "#3A3A3A", fontWeight: 400 }}>(optional)</span></label>
+          <textarea style={{ ...s.input, minHeight: 80, resize: "vertical" }} value={form.notes} onChange={e => set("notes", e.target.value)} placeholder="Car make/model, special requests..." />
+        </div>
+
+        {error && <div style={s.errorBox}>{error}</div>}
+        <button style={{ ...s.btnPrimary, ...(!form.client_name || !form.service_type || !form.booking_date || !form.booking_time ? s.btnDisabled : {}) }} disabled={loading || !form.client_name || !form.service_type || !form.booking_date || !form.booking_time} onClick={submit}>
+          {loading ? "Adding..." : "Add Service"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AdminView() {
   const [tab, setTab] = useState("bookings");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [adding, setAdding] = useState(false);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -819,22 +951,27 @@ function AdminView() {
   };
 
   const filtered = filter === "all" ? bookings : bookings.filter(b => b.status === filter);
-
-  const counts = bookings.reduce((acc, b) => {
-    acc[b.status] = (acc[b.status] || 0) + 1;
-    return acc;
-  }, {});
+  const counts = bookings.reduce((acc, b) => { acc[b.status] = (acc[b.status] || 0) + 1; return acc; }, {});
+  const completedBookings = bookings.filter(b => b.status === "completed");
+  const revenue = completedBookings.reduce((sum, b) => sum + (getPriceFromBooking(b) ?? 0), 0);
 
   return (
     <div>
       <div style={s.adminTopBar}>
         <h1 style={s.adminTitle}>Admin</h1>
-        {tab === "bookings" && <button style={s.refreshBtn} onClick={fetchBookings}>↻ Refresh</button>}
+        <div style={{ display: "flex", gap: 8 }}>
+          {tab === "bookings" && !adding && (
+            <>
+              <button style={s.addServiceBtn} onClick={() => setAdding(true)}>+ Add Service</button>
+              <button style={s.refreshBtn} onClick={fetchBookings}>↻ Refresh</button>
+            </>
+          )}
+        </div>
       </div>
 
       <div style={s.adminTabRow}>
         {["bookings", "gallery"].map(t => (
-          <button key={t} style={{ ...s.adminTab, ...(tab === t ? s.adminTabActive : {}) }} onClick={() => setTab(t)}>
+          <button key={t} style={{ ...s.adminTab, ...(tab === t ? s.adminTabActive : {}) }} onClick={() => { setTab(t); setAdding(false); }}>
             {t === "bookings" ? "Bookings" : "Gallery Photos"}
           </button>
         ))}
@@ -842,71 +979,81 @@ function AdminView() {
 
       {tab === "gallery" && <PhotoManager />}
 
-      {tab === "bookings" && <><div style={s.statsRow}>
-        {[["total", bookings.length, "#F97316"], ["pending", counts.pending || 0, "#FB923C"], ["confirmed", counts.confirmed || 0, "#60A5FA"], ["completed", counts.completed || 0, "#86EFAC"]].map(([label, count, color]) => (
-          <div key={label} style={s.statCard}>
-            <span style={{ ...s.statNum, color }}>{count}</span>
-            <span style={s.statLabel}>{label}</span>
+      {tab === "bookings" && adding && (
+        <AdminAddBooking onDone={() => { setAdding(false); fetchBookings(); }} />
+      )}
+
+      {tab === "bookings" && !adding && (
+        <>
+          <div style={s.statsRow}>
+            {[["total", bookings.length, "#F97316"], ["pending", counts.pending || 0, "#FB923C"], ["confirmed", counts.confirmed || 0, "#60A5FA"], ["completed", counts.completed || 0, "#86EFAC"]].map(([label, count, color]) => (
+              <div key={label} style={s.statCard}>
+                <span style={{ ...s.statNum, color }}>{count}</span>
+                <span style={s.statLabel}>{label}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div style={s.filterRow}>
-        {["all", "pending", "confirmed", "completed", "cancelled"].map(f => (
-          <button
-            key={f}
-            style={{ ...s.filterBtn, ...(filter === f ? s.filterBtnActive : {}) }}
-            onClick={() => setFilter(f)}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
+          <div style={s.revenueCard}>
+            <div>
+              <div style={s.revenueLabel}>Revenue · Completed Jobs</div>
+              <div style={s.revenueSub}>{completedBookings.length} job{completedBookings.length !== 1 ? "s" : ""} completed</div>
+            </div>
+            <div style={s.revenueAmount}>${revenue.toLocaleString()}</div>
+          </div>
 
-      {loading ? (
-        <p style={s.emptyMsg}>Loading...</p>
-      ) : filtered.length === 0 ? (
-        <p style={s.emptyMsg}>No bookings found.</p>
-      ) : (
-        <div style={s.bookingList}>
-          {filtered.map(b => {
-            const st = STATUS_STYLES[b.status] || STATUS_STYLES.pending;
-            return (
-              <div key={b.id} style={s.bookingCard}>
-                <div style={s.bookingTop}>
-                  <div>
-                    <div style={s.bookingName}>{b.client_name}</div>
-                    <div style={s.bookingDate}>
-                      {new Date(b.booking_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · {b.booking_time}
+          <div style={s.filterRow}>
+            {["all", "pending", "confirmed", "completed", "cancelled"].map(f => (
+              <button key={f} style={{ ...s.filterBtn, ...(filter === f ? s.filterBtnActive : {}) }} onClick={() => setFilter(f)}>{f}</button>
+            ))}
+          </div>
+
+          {loading ? (
+            <p style={s.emptyMsg}>Loading...</p>
+          ) : filtered.length === 0 ? (
+            <p style={s.emptyMsg}>No bookings found.</p>
+          ) : (
+            <div style={s.bookingList}>
+              {filtered.map(b => {
+                const st = STATUS_STYLES[b.status] || STATUS_STYLES.pending;
+                const bPrice = getPriceFromBooking(b);
+                const notesDisplay = cleanNotes(b.notes);
+                return (
+                  <div key={b.id} style={s.bookingCard}>
+                    <div style={s.bookingTop}>
+                      <div>
+                        <div style={s.bookingName}>{b.client_name}</div>
+                        <div style={s.bookingDate}>
+                          {new Date(b.booking_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · {b.booking_time}
+                        </div>
+                      </div>
+                      <span style={{ ...s.badge, background: st.bg, color: st.color }}>{st.label}</span>
+                    </div>
+                    <div style={s.bookingBody}>
+                      <div style={s.bookingDetail}>
+                        <strong>Service:</strong> {b.service_type}
+                        {bPrice !== null && <span style={{ color: "#86EFAC", marginLeft: 8, fontWeight: 700 }}>${bPrice}</span>}
+                      </div>
+                      {b.client_email && <div style={s.bookingDetail}><strong>Email:</strong> {b.client_email}</div>}
+                      {b.client_phone && <div style={s.bookingDetail}><strong>Phone:</strong> {b.client_phone}</div>}
+                      {notesDisplay && <div style={s.bookingDetail}><strong>Notes:</strong> {notesDisplay}</div>}
+                    </div>
+                    <div style={s.bookingActions}>
+                      <span style={s.actionLabel}>Update status:</span>
+                      <select style={s.statusSelect} value={b.status} onChange={e => updateStatus(b.id, e.target.value)}>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                     </div>
                   </div>
-                  <span style={{ ...s.badge, background: st.bg, color: st.color }}>{st.label}</span>
-                </div>
-                <div style={s.bookingBody}>
-                  <div style={s.bookingDetail}><strong>Service:</strong> {b.service_type}</div>
-                  <div style={s.bookingDetail}><strong>Email:</strong> {b.client_email}</div>
-                  <div style={s.bookingDetail}><strong>Phone:</strong> {b.client_phone}</div>
-                  {b.notes && <div style={s.bookingDetail}><strong>Notes:</strong> {b.notes}</div>}
-                </div>
-                <div style={s.bookingActions}>
-                  <span style={s.actionLabel}>Update status:</span>
-                  <select
-                    style={s.statusSelect}
-                    value={b.status}
-                    onChange={e => updateStatus(b.id, e.target.value)}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
-      </>}
     </div>
   );
 }
@@ -1066,7 +1213,12 @@ const s = {
   adminTopBar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   adminTitle: { fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: 0, letterSpacing: "-0.02em" },
   refreshBtn: { padding: "7px 14px", background: "transparent", border: "1px solid #1A1A1A", borderRadius: 7, cursor: "pointer", fontSize: 11, color: "#444", fontFamily: "inherit", letterSpacing: "0.04em" },
-  statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 },
+  addServiceBtn: { padding: "7px 14px", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: 7, cursor: "pointer", fontSize: 11, color: "#F97316", fontFamily: "inherit", fontWeight: 700, letterSpacing: "0.04em" },
+  statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 14 },
+  revenueCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #86EFAC", borderRadius: 10, padding: "16px 22px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between" },
+  revenueLabel: { fontSize: 9, color: "#3A3A3A", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 4 },
+  revenueAmount: { fontSize: 34, fontWeight: 800, color: "#86EFAC", letterSpacing: "-0.03em" },
+  revenueSub: { fontSize: 11, color: "#2E2E2E" },
   statCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "18px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
   statNum: { fontSize: 30, fontWeight: 800, letterSpacing: "-0.03em" },
   statLabel: { fontSize: 9, color: "#3A3A3A", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em" },
