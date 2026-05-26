@@ -60,6 +60,7 @@ const STATUS_STYLES = {
   confirmed: { bg: "#1E3A5F", color: "#60A5FA", label: "Confirmed" },
   completed: { bg: "#14532D", color: "#86EFAC", label: "Completed" },
   cancelled: { bg: "#3B0000", color: "#FCA5A5", label: "Cancelled" },
+  archived:  { bg: "#252525", color: "#A3A3A3", label: "Archived" },
 };
 
 function NavTabs({ view, setView }) {
@@ -894,10 +895,12 @@ function AdminAddBooking({ onDone }) {
           <div style={s.fieldGroup}>
             <label style={s.label}>Date</label>
             <input style={s.input} type="date" value={form.booking_date} onChange={e => set("booking_date", e.target.value)} />
+            <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 6 }}>Admin can enter any date here for custom bookings.</div>
           </div>
           <div style={s.fieldGroup}>
             <label style={s.label}>Time</label>
             <input style={s.input} value={form.booking_time} onChange={e => set("booking_time", e.target.value)} placeholder="e.g. 10:00 AM" />
+            <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 6 }}>Enter any time for the booking; regular clients still use available slots.</div>
           </div>
         </div>
 
@@ -949,7 +952,24 @@ function AdminView() {
     setBookings(b => b.map(bk => bk.id === id ? { ...bk, status } : bk));
   };
 
-  const filtered = filter === "all" ? bookings : bookings.filter(b => b.status === filter);
+  const archiveBooking = async (id) => {
+    if (!window.confirm("Archive this booking? You can restore it later from Archived.")) return;
+    await supabase.from("bookings").update({ status: "archived" }).eq("id", id);
+    setBookings(b => b.map(bk => bk.id === id ? { ...bk, status: "archived" } : bk));
+  };
+
+  const deleteBooking = async (id) => {
+    if (!window.confirm("Delete this booking permanently? This cannot be undone.")) return;
+    await supabase.from("bookings").delete().eq("id", id);
+    setBookings(b => b.filter(bk => bk.id !== id));
+  };
+
+  const restoreBooking = async (id) => {
+    await supabase.from("bookings").update({ status: "pending" }).eq("id", id);
+    setBookings(b => b.map(bk => bk.id === id ? { ...bk, status: "pending" } : bk));
+  };
+
+  const filtered = filter === "all" ? bookings.filter(b => b.status !== "archived") : bookings.filter(b => b.status === filter);
   const counts = bookings.reduce((acc, b) => { acc[b.status] = (acc[b.status] || 0) + 1; return acc; }, {});
   const completedBookings = bookings.filter(b => b.status === "completed");
   const revenue = completedBookings.reduce((sum, b) => sum + (getPriceFromBooking(b) ?? 0), 0);
@@ -969,9 +989,9 @@ function AdminView() {
       </div>
 
       <div style={s.adminTabRow}>
-        {["bookings", "gallery"].map(t => (
+        {["bookings", "archived", "gallery"].map(t => (
           <button key={t} style={{ ...s.adminTab, ...(tab === t ? s.adminTabActive : {}) }} onClick={() => { setTab(t); setAdding(false); }}>
-            {t === "bookings" ? "Bookings" : "Gallery Photos"}
+            {t === "bookings" ? "Bookings" : t === "archived" ? "Archived" : "Gallery Photos"}
           </button>
         ))}
       </div>
@@ -1026,7 +1046,17 @@ function AdminView() {
                           {new Date(b.booking_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · {b.booking_time}
                         </div>
                       </div>
-                      <span style={{ ...s.badge, background: st.bg, color: st.color }}>{st.label}</span>
+                      <div style={s.bookingTopActions}>
+                        <span style={{ ...s.badge, background: st.bg, color: st.color }}>{st.label}</span>
+                        <button style={s.trashBtn} onClick={() => archiveBooking(b.id)} title="Archive booking">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 4h14v4H5z" />
+                            <path d="M7 8v11a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V8" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                     <div style={s.bookingBody}>
                       <div style={s.bookingDetail}>
@@ -1053,6 +1083,63 @@ function AdminView() {
           )}
         </>
       )}
+
+      {tab === "archived" && (
+        <>
+          <div style={s.statsRow}>
+            <div style={s.statCard}>
+              <span style={{ ...s.statNum, color: "#A3A3A3" }}>{bookings.filter(b => b.status === "archived").length}</span>
+              <span style={s.statLabel}>Archived</span>
+            </div>
+          </div>
+
+          {loading ? (
+            <p style={s.emptyMsg}>Loading...</p>
+          ) : bookings.filter(b => b.status === "archived").length === 0 ? (
+            <p style={s.emptyMsg}>No archived bookings yet.</p>
+          ) : (
+            <div style={s.bookingList}>
+              {bookings.filter(b => b.status === "archived").map(b => {
+                const st = STATUS_STYLES[b.status] || STATUS_STYLES.pending;
+                const bPrice = getPriceFromBooking(b);
+                const notesDisplay = cleanNotes(b.notes);
+                return (
+                  <div key={b.id} style={s.bookingCard}>
+                    <div style={s.bookingTop}>
+                      <div>
+                        <div style={s.bookingName}>{b.client_name}</div>
+                        <div style={s.bookingDate}>
+                          {new Date(b.booking_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · {b.booking_time}
+                        </div>
+                      </div>
+                      <div style={s.bookingTopActions}>
+                        <span style={{ ...s.badge, background: st.bg, color: st.color }}>{st.label}</span>
+                        <button style={s.trashBtn} onClick={() => restoreBooking(b.id)} title="Restore booking">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 12h3l3 9 3-18 3 18 3-9h3" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div style={s.bookingBody}>
+                      <div style={s.bookingDetail}>
+                        <strong>Service:</strong> {b.service_type}
+                        {bPrice !== null && <span style={{ color: "#86EFAC", marginLeft: 8, fontWeight: 700 }}>${bPrice}</span>}
+                      </div>
+                      {b.client_email && <div style={s.bookingDetail}><strong>Email:</strong> {b.client_email}</div>}
+                      {b.client_phone && <div style={s.bookingDetail}><strong>Phone:</strong> {b.client_phone}</div>}
+                      {notesDisplay && <div style={s.bookingDetail}><strong>Notes:</strong> {notesDisplay}</div>}
+                    </div>
+                    <div style={s.bookingActions}>
+                      <button style={{ ...s.filterBtn, borderRadius: 6, padding: "8px 12px" }} onClick={() => deleteBooking(b.id)}>Delete permanently</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -1065,9 +1152,9 @@ const s = {
   logo: { display: "flex", alignItems: "center", gap: 10 },
   logoImg: { height: 32, width: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid #1E1E1E" },
   logoName: { fontSize: 14, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em" },
-  nav: { display: "flex", height: "100%" },
-  navBtn: { padding: "0 18px", border: "none", background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#888888", fontFamily: "inherit", display: "flex", alignItems: "center", height: "100%" },
-  navBtnActive: { color: "#EEEEEE" },
+  nav: { display: "flex", height: "100%", gap: 6, alignItems: "center" },
+  navBtn: { padding: "10px 20px", border: "1px solid transparent", background: "rgba(255,255,255,0.04)", cursor: "pointer", fontSize: 14, fontWeight: 700, color: "#E5E7EB", fontFamily: "inherit", display: "flex", alignItems: "center", height: "auto", borderRadius: 9999, transition: "all 0.18s ease" },
+  navBtnActive: { color: "#FFFFFF", background: "rgba(249,115,22,0.18)", borderColor: "rgba(249,115,22,0.35)" },
   backBtn: { padding: "7px 16px", borderRadius: 7, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 13, color: "#888", fontFamily: "inherit" },
   main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
 
@@ -1235,6 +1322,8 @@ const s = {
   bookingActions: { display: "flex", alignItems: "center", gap: 10 },
   actionLabel: { fontSize: 9, color: "#666666", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" },
   statusSelect: { padding: "6px 10px", border: "1px solid #1A1A1A", borderRadius: 6, fontSize: 13, fontFamily: "inherit", cursor: "pointer", background: "#080808", color: "#EEEEEE" },
+  bookingTopActions: { display: "flex", alignItems: "center", gap: 8 },
+  trashBtn: { display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 10, border: "1px solid #2A2A2A", background: "#0B0B0B", color: "#F87171", cursor: "pointer", transition: "background 0.2s, transform 0.2s" },
   adminTabRow: { display: "flex", marginBottom: 24, borderBottom: "1px solid #141414" },
   adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#888888", fontFamily: "inherit", letterSpacing: "0.08em", textTransform: "uppercase" },
   adminTabActive: { color: "#EEEEEE", borderBottomColor: "#F97316" },
