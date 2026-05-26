@@ -5,8 +5,7 @@ const SUPABASE_URL = "https://uzxsqstnjtcxvyopapuq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_JlmBO1T7-SnaF8Ib4Vo4fA_alV2aTej";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const ADMIN_PASSWORD = "detailing2026";
-
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 const SERVICES = [
   { id: "interior", name: "Interior Only", duration: "1.5 hrs", prices: { sedan: 80, suv: 95 } },
   { id: "exterior-basic", name: "Exterior Basic", duration: "1 hr", prices: { sedan: 45, suv: 45 } },
@@ -856,11 +855,11 @@ function AdminAddBooking({ onDone }) {
           <input style={s.input} value={form.client_name} onChange={e => set("client_name", e.target.value)} placeholder="Jane Smith" />
         </div>
         <div style={s.fieldGroup}>
-          <label style={s.label}>Phone <span style={{ color: "#3A3A3A", fontWeight: 400 }}>(optional)</span></label>
+          <label style={s.label}>Phone <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
           <input style={s.input} type="tel" value={form.client_phone} onChange={e => set("client_phone", e.target.value)} placeholder="(555) 000-0000" />
         </div>
         <div style={s.fieldGroup}>
-          <label style={s.label}>Email <span style={{ color: "#3A3A3A", fontWeight: 400 }}>(optional)</span></label>
+          <label style={s.label}>Email <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
           <input style={s.input} type="email" value={form.client_email} onChange={e => set("client_email", e.target.value)} placeholder="you@example.com" />
         </div>
 
@@ -912,7 +911,7 @@ function AdminAddBooking({ onDone }) {
         </div>
 
         <div style={s.fieldGroup}>
-          <label style={s.label}>Notes <span style={{ color: "#3A3A3A", fontWeight: 400 }}>(optional)</span></label>
+          <label style={s.label}>Notes <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
           <textarea style={{ ...s.input, minHeight: 80, resize: "vertical" }} value={form.notes} onChange={e => set("notes", e.target.value)} placeholder="Car make/model, special requests..." />
         </div>
 
@@ -1067,9 +1066,9 @@ const s = {
   logoImg: { height: 32, width: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid #1E1E1E" },
   logoName: { fontSize: 14, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em" },
   nav: { display: "flex", height: "100%" },
-  navBtn: { padding: "0 18px", border: "none", background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#4A4A4A", fontFamily: "inherit", display: "flex", alignItems: "center", height: "100%" },
+  navBtn: { padding: "0 18px", border: "none", background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#888888", fontFamily: "inherit", display: "flex", alignItems: "center", height: "100%" },
   navBtnActive: { color: "#EEEEEE" },
-  backBtn: { padding: "7px 16px", borderRadius: 7, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 13, color: "#555", fontFamily: "inherit" },
+  backBtn: { padding: "7px 16px", borderRadius: 7, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 13, color: "#888", fontFamily: "inherit" },
   main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
 
   // Hero — dot grid background, big bold typography
@@ -1079,10 +1078,10 @@ const s = {
   heroTitle: { fontSize: 46, fontWeight: 800, color: "#EEEEEE", letterSpacing: "-0.035em", margin: 0, textAlign: "center", lineHeight: 1.05 },
   heroRule: { display: "flex", alignItems: "center", gap: 14, width: "100%", maxWidth: 380 },
   heroRuleLine: { flex: 1, height: 1, background: "#1A1A1A" },
-  heroStats: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", whiteSpace: "nowrap" },
+  heroStats: { fontSize: 10, color: "#888888", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", whiteSpace: "nowrap" },
   phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 8, border: "1px solid #1E1E1E", background: "#0C0C0C", color: "#EEEEEE", fontSize: 15, fontWeight: 600, textDecoration: "none", marginTop: 2 },
   socialRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" },
-  socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, border: "1px solid #161616", background: "transparent", color: "#4A4A4A", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit" },
+  socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, border: "1px solid #161616", background: "transparent", color: "#888888", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit" },
   footer: { textAlign: "center", paddingBottom: 28 },
   adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1C1C1C", fontFamily: "inherit" },
 
@@ -1091,20 +1090,20 @@ const s = {
   bookingHeaderTop: { display: "flex", alignItems: "center", gap: 12, marginBottom: 6 },
   bookingHeaderTitle: { fontSize: 28, fontWeight: 800, color: "#EEEEEE", margin: 0, letterSpacing: "-0.03em" },
   bookingHeaderBadge: { fontSize: 11, fontWeight: 700, color: "#F97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 20, padding: "3px 10px", letterSpacing: "0.04em" },
-  bookingHeaderSub: { fontSize: 13, color: "#4A4A4A", margin: 0 },
+  bookingHeaderSub: { fontSize: 13, color: "#888888", margin: 0 },
 
   // Value props strip
   valueRow: { display: "flex", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginBottom: 32, overflow: "hidden" },
   valueItem: { flex: 1, display: "flex", alignItems: "center", gap: 14, padding: "20px 22px" },
   valueIconWrap: { width: 38, height: 38, borderRadius: 9, background: "rgba(249,115,22,0.07)", border: "1px solid rgba(249,115,22,0.14)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 3 },
-  valueSub: { fontSize: 11, color: "#3A3A3A", lineHeight: 1.45 },
+  valueSub: { fontSize: 11, color: "#888888", lineHeight: 1.45 },
   valueSep: {},
 
   // Share banner
   shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 12, padding: "22px 26px", marginTop: 32, marginBottom: 0, flexWrap: "wrap" },
   shareTitle: { fontSize: 16, fontWeight: 700, color: "#EEEEEE", marginBottom: 5, letterSpacing: "-0.01em" },
-  shareSub: { fontSize: 12, color: "#3A3A3A" },
+  shareSub: { fontSize: 12, color: "#888888" },
   shareBtn: { display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", flexShrink: 0 },
   shareBtnCopied: { background: "#14532D", color: "#86EFAC" },
 
@@ -1115,17 +1114,17 @@ const s = {
   stepBar: { display: "flex", justifyContent: "space-between", marginBottom: 36, position: "relative" },
   stepLine: { position: "absolute", top: 12, left: "calc(12.5% + 14px)", right: "calc(12.5% + 14px)", height: 1, background: "#1A1A1A" },
   stepItem: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flex: 1, position: "relative", zIndex: 1 },
-  stepDot: { width: 26, height: 26, borderRadius: "50%", border: "1px solid #1E1E1E", background: "#0C0C0C", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#2E2E2E" },
+  stepDot: { width: 26, height: 26, borderRadius: "50%", border: "1px solid #1E1E1E", background: "#0C0C0C", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#666666" },
   stepActive: { border: "2px solid #F97316", color: "#F97316" },
   stepDone: { background: "#F97316", border: "2px solid #F97316", color: "#fff" },
-  stepLabel: { fontSize: 11, color: "#2E2E2E", fontWeight: 500, textAlign: "center" },
+  stepLabel: { fontSize: 11, color: "#666666", fontWeight: 500, textAlign: "center" },
   stepLabelActive: { color: "#EEEEEE" },
 
   // Form
   formSection: { display: "flex", flexDirection: "column", gap: 22 },
   sectionTitle: { fontSize: 22, fontWeight: 800, color: "#EEEEEE", margin: "0 0 4px", letterSpacing: "-0.02em" },
   fieldGroup: { display: "flex", flexDirection: "column", gap: 7 },
-  label: { fontSize: 10, fontWeight: 700, color: "#4A4A4A", letterSpacing: "0.1em", textTransform: "uppercase" },
+  label: { fontSize: 10, fontWeight: 700, color: "#888888", letterSpacing: "0.1em", textTransform: "uppercase" },
   input: { padding: "11px 14px", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box", width: "100%", background: "#080808", color: "#EEEEEE" },
 
   // Service cards — inset left orange accent on selection
@@ -1135,11 +1134,11 @@ const s = {
   serviceName: { fontSize: 14, fontWeight: 600, color: "#EEEEEE" },
   serviceMeta: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 },
   servicePrice: { fontSize: 20, fontWeight: 800, color: "#F97316", letterSpacing: "-0.02em" },
-  serviceDuration: { fontSize: 10, color: "#3A3A3A", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" },
+  serviceDuration: { fontSize: 10, color: "#888888", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" },
 
   // Vehicle toggle — segmented control
   vehicleToggle: { display: "flex", background: "#080808", border: "1px solid #1A1A1A", borderRadius: 9, padding: 3 },
-  vehicleBtn: { flex: 1, padding: "10px 16px", border: "none", borderRadius: 7, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#333", fontFamily: "inherit" },
+  vehicleBtn: { flex: 1, padding: "10px 16px", border: "none", borderRadius: 7, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#777", fontFamily: "inherit" },
   vehicleBtnActive: { background: "#171717", color: "#EEEEEE" },
 
   // Time slots — inset left orange accent on selection
@@ -1152,13 +1151,13 @@ const s = {
   // Confirm card
   confirmCard: { border: "1px solid #161616", borderRadius: 8, overflow: "hidden" },
   confirmRow: { display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #0F0F0F" },
-  confirmLabel: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase" },
+  confirmLabel: { fontSize: 10, color: "#888888", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase" },
   confirmValue: { fontSize: 13, color: "#EEEEEE", fontWeight: 600, textAlign: "right", maxWidth: "60%" },
 
   // Buttons
   btnRow: { display: "flex", gap: 10, justifyContent: "flex-end" },
   btnPrimary: { padding: "14px 28px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase" },
-  btnSecondary: { padding: "14px 22px", background: "transparent", color: "#4A4A4A", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.02em" },
+  btnSecondary: { padding: "14px 22px", background: "transparent", color: "#888888", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.02em" },
   btnDisabled: { opacity: 0.22, cursor: "not-allowed" },
   errorBox: { background: "#180000", border: "1px solid #380000", color: "#FC8181", padding: "12px 14px", borderRadius: 8, fontSize: 13 },
 
@@ -1168,15 +1167,15 @@ const s = {
   successIcon: { width: 56, height: 56, borderRadius: "50%", background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, margin: "0 auto 20px", color: "#fff", fontWeight: 700 },
   successTitle: { fontSize: 32, fontWeight: 800, color: "#EEEEEE", margin: "0 0 16px", letterSpacing: "-0.03em" },
   successBody: { fontSize: 15, color: "#777", margin: "0 0 8px", lineHeight: 1.7, maxWidth: 420 },
-  successSub: { fontSize: 13, color: "#3A3A3A", margin: "0 0 36px" },
+  successSub: { fontSize: 13, color: "#888888", margin: "0 0 36px" },
   successActions: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 32 },
-  successNav: { fontSize: 12, color: "#2E2E2E", maxWidth: 340 },
-  emptyMsg: { textAlign: "center", color: "#2E2E2E", padding: "40px 0", fontSize: 14 },
+  successNav: { fontSize: 12, color: "#666666", maxWidth: 340 },
+  emptyMsg: { textAlign: "center", color: "#666666", padding: "40px 0", fontSize: 14 },
 
   // Gallery & section headers
   galleryHero: { textAlign: "center", marginBottom: 32, paddingTop: 36 },
   galleryHeroTitle: { fontSize: 34, fontWeight: 800, color: "#EEEEEE", margin: "0 0 8px", letterSpacing: "-0.03em" },
-  galleryHeroSub: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", margin: 0 },
+  galleryHeroSub: { fontSize: 10, color: "#888888", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", margin: 0 },
   photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(195px, 1fr))", gap: 8 },
   photoLink: { display: "block", borderRadius: 8, overflow: "hidden", aspectRatio: "1", border: "1px solid #141414" },
   photoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
@@ -1185,62 +1184,62 @@ const s = {
   floatingWrap: { position: "fixed", right: 24, top: "50%", marginTop: -80, zIndex: 5, width: 224 },
   floatingCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 10, padding: "14px 16px" },
   floatingStars: { color: "#F97316", fontSize: 13, letterSpacing: 2, marginBottom: 8 },
-  floatingComment: { fontSize: 12, color: "#666", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
-  floatingName: { fontSize: 10, color: "#333", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" },
+  floatingComment: { fontSize: 12, color: "#909090", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
+  floatingName: { fontSize: 10, color: "#777", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" },
 
   // Reviews
   reviewStats: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, padding: "28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
   reviewAvgBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 80 },
   reviewAvgNum: { fontSize: 56, fontWeight: 800, color: "#EEEEEE", lineHeight: 1, letterSpacing: "-0.04em" },
   reviewAvgStars: { display: "flex", gap: 2 },
-  reviewCount: { fontSize: 10, color: "#3A3A3A", fontWeight: 700, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.1em" },
+  reviewCount: { fontSize: 10, color: "#888888", fontWeight: 700, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.1em" },
   reviewBars: { flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 200 },
   reviewBarRow: { display: "flex", alignItems: "center", gap: 10 },
-  reviewBarLabel: { fontSize: 11, color: "#3A3A3A", width: 24, textAlign: "right", flexShrink: 0, fontWeight: 600 },
+  reviewBarLabel: { fontSize: 11, color: "#888888", width: 24, textAlign: "right", flexShrink: 0, fontWeight: 600 },
   reviewBarTrack: { flex: 1, height: 4, background: "#141414", borderRadius: 99, overflow: "hidden" },
   reviewBarFill: { height: "100%", background: "#F97316", borderRadius: 99, transition: "width 0.6s ease" },
-  reviewBarCount: { fontSize: 11, color: "#2E2E2E", width: 20, flexShrink: 0 },
+  reviewBarCount: { fontSize: 11, color: "#666666", width: 20, flexShrink: 0 },
   starPicker: { display: "flex", gap: 0, marginTop: 4 },
   starPickBtn: { background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 },
   anonRow: { display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginTop: 6 },
   reviewCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 },
   reviewCardTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" },
   reviewerName: { fontSize: 14, fontWeight: 700, color: "#EEEEEE", marginBottom: 4 },
-  reviewDate: { fontSize: 10, color: "#2E2E2E", flexShrink: 0, fontWeight: 600, letterSpacing: "0.04em" },
-  reviewComment: { fontSize: 14, color: "#5A5A5A", lineHeight: 1.6, margin: 0 },
+  reviewDate: { fontSize: 10, color: "#666666", flexShrink: 0, fontWeight: 600, letterSpacing: "0.04em" },
+  reviewComment: { fontSize: 14, color: "#909090", lineHeight: 1.6, margin: 0 },
 
   // Admin
   adminTopBar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   adminTitle: { fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: 0, letterSpacing: "-0.02em" },
-  refreshBtn: { padding: "7px 14px", background: "transparent", border: "1px solid #1A1A1A", borderRadius: 7, cursor: "pointer", fontSize: 11, color: "#444", fontFamily: "inherit", letterSpacing: "0.04em" },
+  refreshBtn: { padding: "7px 14px", background: "transparent", border: "1px solid #1A1A1A", borderRadius: 7, cursor: "pointer", fontSize: 11, color: "#888", fontFamily: "inherit", letterSpacing: "0.04em" },
   addServiceBtn: { padding: "7px 14px", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: 7, cursor: "pointer", fontSize: 11, color: "#F97316", fontFamily: "inherit", fontWeight: 700, letterSpacing: "0.04em" },
   statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 14 },
   revenueCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #86EFAC", borderRadius: 10, padding: "16px 22px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between" },
-  revenueLabel: { fontSize: 9, color: "#3A3A3A", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 4 },
+  revenueLabel: { fontSize: 9, color: "#888888", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 4 },
   revenueAmount: { fontSize: 34, fontWeight: 800, color: "#86EFAC", letterSpacing: "-0.03em" },
-  revenueSub: { fontSize: 11, color: "#2E2E2E" },
+  revenueSub: { fontSize: 11, color: "#666666" },
   statCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "18px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
   statNum: { fontSize: 30, fontWeight: 800, letterSpacing: "-0.03em" },
-  statLabel: { fontSize: 9, color: "#3A3A3A", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em" },
+  statLabel: { fontSize: 9, color: "#888888", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em" },
   filterRow: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" },
-  filterBtn: { padding: "5px 14px", borderRadius: 20, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#3A3A3A", textTransform: "capitalize", fontFamily: "inherit", letterSpacing: "0.04em" },
+  filterBtn: { padding: "5px 14px", borderRadius: 20, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "capitalize", fontFamily: "inherit", letterSpacing: "0.04em" },
   filterBtnActive: { background: "#161616", color: "#EEEEEE", borderColor: "#252525" },
   bookingList: { display: "flex", flexDirection: "column", gap: 10 },
   bookingCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "16px 20px" },
   bookingTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
   bookingName: { fontSize: 15, fontWeight: 700, color: "#EEEEEE", marginBottom: 2 },
-  bookingDate: { fontSize: 12, color: "#3A3A3A" },
+  bookingDate: { fontSize: 12, color: "#888888" },
   badge: { padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" },
   bookingBody: { display: "flex", flexDirection: "column", gap: 4, marginBottom: 14, paddingBottom: 14, borderBottom: "1px solid #111" },
-  bookingDetail: { fontSize: 13, color: "#5A5A5A" },
+  bookingDetail: { fontSize: 13, color: "#909090" },
   bookingActions: { display: "flex", alignItems: "center", gap: 10 },
-  actionLabel: { fontSize: 9, color: "#2E2E2E", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" },
+  actionLabel: { fontSize: 9, color: "#666666", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" },
   statusSelect: { padding: "6px 10px", border: "1px solid #1A1A1A", borderRadius: 6, fontSize: 13, fontFamily: "inherit", cursor: "pointer", background: "#080808", color: "#EEEEEE" },
   adminTabRow: { display: "flex", marginBottom: 24, borderBottom: "1px solid #141414" },
-  adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#3A3A3A", fontFamily: "inherit", letterSpacing: "0.08em", textTransform: "uppercase" },
+  adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#888888", fontFamily: "inherit", letterSpacing: "0.08em", textTransform: "uppercase" },
   adminTabActive: { color: "#EEEEEE", borderBottomColor: "#F97316" },
   uploadCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: 20, display: "flex", flexDirection: "column", gap: 14 },
-  uploadLabel: { fontSize: 10, fontWeight: 700, color: "#4A4A4A", margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" },
+  uploadLabel: { fontSize: 10, fontWeight: 700, color: "#888888", margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" },
   uploadZone: { display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 8, border: "1px dashed #1E1E1E", overflow: "hidden", minHeight: 160 },
   uploadEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: 32 },
   uploadIcon: { fontSize: 24, color: "#F97316" },
