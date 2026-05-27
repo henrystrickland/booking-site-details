@@ -510,13 +510,14 @@ function FloatingReviews() {
   const [reviews, setReviews] = useState([]);
   const [idx, setIdx] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     supabase.from("reviews").select("*").eq("rating", 5).not("comment", "is", null)
       .order("created_at", { ascending: false }).limit(20)
       .then(({ data }) => {
         const eligible = (data || []).filter(r => r.comment && r.comment.trim());
-        if (eligible.length > 0) { setReviews(eligible); setTimeout(() => setVisible(true), 1000); }
+          if (eligible.length > 0) { setReviews(eligible); setTimeout(() => setVisible(true), 1000); }
       });
   }, []);
 
@@ -533,13 +534,20 @@ function FloatingReviews() {
   const r = reviews[idx];
   return (
     <div className="floating-review" style={s.floatingWrap}>
-      <div style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(12px)", transition: "opacity 0.7s ease, transform 0.7s ease" }}>
-        <div style={s.floatingCard}>
-          <div style={s.floatingStars}>★★★★★</div>
-          <p style={s.floatingComment}>"{r.comment}"</p>
-          <span style={s.floatingName}>— {r.anonymous ? "Anonymous" : (r.reviewer_name || "Anonymous")}</span>
+      {/* compact toggle button to reduce visual clutter */}
+      <button aria-label="Toggle reviews" style={s.floatingButton} onClick={() => setOpen(o => !o)}>
+        ★
+      </button>
+
+      {open && (
+        <div style={{ marginTop: 10, opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(6px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
+          <div style={s.floatingCard}>
+            <div style={s.floatingStars}>★★★★★</div>
+            <p style={s.floatingComment} title={r.comment}>{r.comment.length > 140 ? r.comment.slice(0, 137) + '…' : r.comment}</p>
+            <span style={s.floatingName}>— {r.anonymous ? "Anonymous" : (r.reviewer_name || "Anonymous")}</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -602,7 +610,7 @@ function ReviewsView() {
                   <button key={n} style={s.starPickBtn}
                     onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
                     onClick={() => setForm(f => ({ ...f, rating: n }))}>
-                    <span style={{ color: (hovered || form.rating) >= n ? "#F97316" : "rgba(255,255,255,0.15)", fontSize: 48, lineHeight: 1, display: "block" }}>★</span>
+                    <span style={{ color: (hovered || form.rating) >= n ? "#F97316" : "rgba(255,255,255,0.15)", fontSize: 28, lineHeight: 1, display: "block" }}>★</span>
                   </button>
                 ))}
               </div>
@@ -1264,20 +1272,21 @@ const s = {
   galleryHeroTitle: { fontSize: 34, fontWeight: 800, color: "#EEEEEE", margin: "0 0 8px", letterSpacing: "-0.03em" },
   galleryHeroSub: { fontSize: 10, color: "#888888", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", margin: 0 },
   photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(195px, 1fr))", gap: 8 },
-  photoLink: { display: "block", borderRadius: 8, overflow: "hidden", aspectRatio: "1", border: "1px solid #141414" },
+  photoLink: { display: "block", borderRadius: 8, overflow: "hidden", height: 160, border: "1px solid #141414" },
   photoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
 
   // Floating reviews — left orange border accent
-  floatingWrap: { position: "fixed", right: 24, top: "50%", marginTop: -80, zIndex: 5, width: 224 },
+  floatingWrap: { position: "fixed", right: 20, bottom: 24, zIndex: 50, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 },
   floatingCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 10, padding: "14px 16px" },
   floatingStars: { color: "#F97316", fontSize: 13, letterSpacing: 2, marginBottom: 8 },
   floatingComment: { fontSize: 12, color: "#909090", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
   floatingName: { fontSize: 10, color: "#777", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" },
+  floatingButton: { width: 44, height: 44, borderRadius: 9999, border: "none", background: "#F97316", color: "#111", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, cursor: "pointer", boxShadow: "0 6px 18px rgba(0,0,0,0.45)" },
 
   // Reviews
   reviewStats: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, padding: "28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
   reviewAvgBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 80 },
-  reviewAvgNum: { fontSize: 56, fontWeight: 800, color: "#EEEEEE", lineHeight: 1, letterSpacing: "-0.04em" },
+  reviewAvgNum: { fontSize: 36, fontWeight: 800, color: "#EEEEEE", lineHeight: 1, letterSpacing: "-0.04em" },
   reviewAvgStars: { display: "flex", gap: 2 },
   reviewCount: { fontSize: 10, color: "#888888", fontWeight: 700, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.1em" },
   reviewBars: { flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 200 },
