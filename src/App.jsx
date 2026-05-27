@@ -66,6 +66,7 @@ const STATUS_STYLES = {
 function NavTabs({ view, setView }) {
   const ref = useRef(null);
   const [ind, setInd] = useState({ left: 0, width: 0 });
+  const [pop, setPop] = useState(false);
   const tabs = [{ key: "client", label: "Book" }, { key: "gallery", label: "Gallery" }, { key: "reviews", label: "Reviews" }];
 
   useEffect(() => {
@@ -74,16 +75,22 @@ function NavTabs({ view, setView }) {
     if (idx < 0) return;
     const btn = ref.current.querySelectorAll("button")[idx];
     if (btn) setInd({ left: btn.offsetLeft, width: btn.offsetWidth });
+    // small pop animation when changing tabs
+    setPop(true);
+    const t = setTimeout(() => setPop(false), 260);
+    return () => clearTimeout(t);
   }, [view]);
 
   return (
     <div style={{ position: "relative", display: "flex", height: "100%" }} ref={ref}>
+      {/* circular highlight behind active tab */}
+      <div style={{ position: "absolute", top: "50%", left: ind.left + (ind.width / 2) - 22, width: 44, height: 44, transform: `translateY(-50%) scale(${pop ? 1 : 0.82})`, transition: "left 0.28s cubic-bezier(0.2,0.9,0.2,1), transform 0.28s cubic-bezier(0.2,0.9,0.2,1)", borderRadius: 9999, background: "rgba(249,115,22,0.08)", pointerEvents: "none", zIndex: 0 }} />
       {tabs.map(t => (
-        <button key={t.key} style={{ ...s.navBtn, ...(view === t.key ? s.navBtnActive : {}) }} onClick={() => setView(t.key)}>
+        <button key={t.key} style={{ ...s.navBtn, ...(view === t.key ? s.navBtnActive : {}), position: "relative", zIndex: 1 }} onClick={() => setView(t.key)}>
           {t.label}
         </button>
       ))}
-      <div style={{ position: "absolute", bottom: -1, left: ind.left, width: ind.width, height: 2, background: "#F97316", transition: "left 0.22s cubic-bezier(0.4,0,0.2,1), width 0.22s cubic-bezier(0.4,0,0.2,1)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: -4, left: ind.left, width: ind.width, height: 3, background: "#F97316", borderRadius: 3, boxShadow: "0 4px 12px rgba(249,115,22,0.12)", transition: "left 0.32s cubic-bezier(0.2,0.9,0.2,1), width 0.32s cubic-bezier(0.2,0.9,0.2,1), opacity 0.2s", pointerEvents: "none" }} />
     </div>
   );
 }
@@ -510,14 +517,13 @@ function FloatingReviews() {
   const [reviews, setReviews] = useState([]);
   const [idx, setIdx] = useState(0);
   const [visible, setVisible] = useState(false);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     supabase.from("reviews").select("*").eq("rating", 5).not("comment", "is", null)
       .order("created_at", { ascending: false }).limit(20)
       .then(({ data }) => {
         const eligible = (data || []).filter(r => r.comment && r.comment.trim());
-          if (eligible.length > 0) { setReviews(eligible); setTimeout(() => setVisible(true), 1000); }
+        if (eligible.length > 0) { setReviews(eligible); setTimeout(() => setVisible(true), 1000); }
       });
   }, []);
 
@@ -534,20 +540,13 @@ function FloatingReviews() {
   const r = reviews[idx];
   return (
     <div className="floating-review" style={s.floatingWrap}>
-      {/* compact toggle button to reduce visual clutter */}
-      <button aria-label="Toggle reviews" style={s.floatingButton} onClick={() => setOpen(o => !o)}>
-        ★
-      </button>
-
-      {open && (
-        <div style={{ marginTop: 10, opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(6px)", transition: "opacity 0.4s ease, transform 0.4s ease" }}>
-          <div style={s.floatingCard}>
-            <div style={s.floatingStars}>★★★★★</div>
-            <p style={s.floatingComment} title={r.comment}>{r.comment.length > 140 ? r.comment.slice(0, 137) + '…' : r.comment}</p>
-            <span style={s.floatingName}>— {r.anonymous ? "Anonymous" : (r.reviewer_name || "Anonymous")}</span>
-          </div>
+      <div style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(12px)", transition: "opacity 0.7s ease, transform 0.7s ease" }}>
+        <div style={s.floatingCard}>
+          <div style={s.floatingStars}>★★★★★</div>
+          <p style={s.floatingComment}>"{r.comment}"</p>
+          <span style={s.floatingName}>— {r.anonymous ? "Anonymous" : (r.reviewer_name || "Anonymous")}</span>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -1162,7 +1161,7 @@ const s = {
   logoName: { fontSize: 14, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em" },
   nav: { display: "flex", height: "100%", gap: 6, alignItems: "center" },
   navBtn: { padding: "10px 20px", border: "1px solid transparent", background: "rgba(255,255,255,0.04)", cursor: "pointer", fontSize: 14, fontWeight: 700, color: "#E5E7EB", fontFamily: "inherit", display: "flex", alignItems: "center", height: "auto", borderRadius: 9999, transition: "all 0.18s ease" },
-  navBtnActive: { color: "#FFFFFF", background: "rgba(249,115,22,0.18)", borderColor: "rgba(249,115,22,0.35)" },
+  navBtnActive: { color: "#FFFFFF", background: "transparent", borderColor: "transparent", transform: "translateY(-1px)", boxShadow: "0 6px 18px rgba(0,0,0,0.25)" },
   backBtn: { padding: "7px 16px", borderRadius: 7, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 13, color: "#888", fontFamily: "inherit" },
   main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
 
@@ -1276,12 +1275,11 @@ const s = {
   photoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
 
   // Floating reviews — left orange border accent
-  floatingWrap: { position: "fixed", right: 20, bottom: 24, zIndex: 50, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 },
+  floatingWrap: { position: "fixed", right: 24, top: "50%", marginTop: -80, zIndex: 5, width: 224 },
   floatingCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 10, padding: "14px 16px" },
   floatingStars: { color: "#F97316", fontSize: 13, letterSpacing: 2, marginBottom: 8 },
   floatingComment: { fontSize: 12, color: "#909090", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
   floatingName: { fontSize: 10, color: "#777", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" },
-  floatingButton: { width: 44, height: 44, borderRadius: 9999, border: "none", background: "#F97316", color: "#111", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, cursor: "pointer", boxShadow: "0 6px 18px rgba(0,0,0,0.45)" },
 
   // Reviews
   reviewStats: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, padding: "28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
