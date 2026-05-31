@@ -1,67 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
+import { supabase, SERVICES, getAvailableSlots } from "./config.js";
+import { s } from "./styles.js";
 
-const SUPABASE_URL = "https://uzxsqstnjtcxvyopapuq.supabase.co";
-const SUPABASE_KEY = "sb_publishable_JlmBO1T7-SnaF8Ib4Vo4fA_alV2aTej";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
-const SERVICES = [
-  { id: "interior", name: "Interior Only", duration: "1.5 hrs", prices: { sedan: 80, suv: 95 } },
-  { id: "exterior-basic", name: "Exterior Basic", duration: "1 hr", prices: { sedan: 45, suv: 45 } },
-  { id: "exterior-premium", name: "Exterior Premium", duration: "1.5 hrs", prices: { sedan: 75, suv: 95 } },
-  { id: "combo-basic", name: "Interior + Exterior Basic", duration: "2.5 hrs", prices: { sedan: 110, suv: 120 } },
-  { id: "combo-premium", name: "Interior + Exterior Premium", duration: "3 hrs", prices: { sedan: 135, suv: 155 } },
-];
-
-const WEEKLY_SLOTS = [
-  { day: 6, label: "Saturday", times: ["8:00 AM", "11:00 AM"] },
-  { day: 1, label: "Monday", times: ["4:00 PM"] },
-  { day: 3, label: "Wednesday", times: ["4:00 PM"] },
-];
-
-function getPriceFromBooking(b) {
-  const svc = SERVICES.find(s => s.name === b.service_type);
-  if (!svc) return null;
-  const m = (b.notes || "").match(/\[vehicle:(sedan|suv)\]/);
-  const vehicle = m ? m[1] : "sedan";
-  return svc.prices[vehicle] ?? null;
-}
-
-function cleanNotes(notes) {
-  if (!notes) return null;
-  return notes.replace(/^\[vehicle:(sedan|suv)\]\n?/, "").trim() || null;
-}
-
-function getAvailableSlots() {
-  const slots = [];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  for (let i = 1; i <= 14; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    const dow = date.getDay();
-    const match = WEEKLY_SLOTS.find((s) => s.day === dow);
-    if (match) {
-      match.times.forEach((time) => {
-        slots.push({
-          date: date.toISOString().split("T")[0],
-          displayDate: date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" }),
-          time,
-        });
-      });
-    }
-  }
-  return slots;
-}
-
-const STATUS_STYLES = {
-  pending:   { bg: "#431407", color: "#FB923C", label: "Pending" },
-  confirmed: { bg: "#1E3A5F", color: "#60A5FA", label: "Confirmed" },
-  completed: { bg: "#14532D", color: "#86EFAC", label: "Completed" },
-  cancelled: { bg: "#3B0000", color: "#FCA5A5", label: "Cancelled" },
-  archived:  { bg: "#252525", color: "#A3A3A3", label: "Archived" },
-};
+const AdminRoot = lazy(() => import("./Admin.jsx"));
 
 function NavTabs({ view, setView }) {
   const ref = useRef(null);
@@ -75,7 +16,6 @@ function NavTabs({ view, setView }) {
     if (idx < 0) return;
     const btn = ref.current.querySelectorAll("button")[idx];
     if (btn) setInd({ left: btn.offsetLeft, width: btn.offsetWidth });
-    // small pop animation when changing tabs
     setPop(true);
     const t = setTimeout(() => setPop(false), 260);
     return () => clearTimeout(t);
@@ -83,7 +23,6 @@ function NavTabs({ view, setView }) {
 
   return (
     <div style={{ position: "relative", display: "flex", height: "100%" }} ref={ref}>
-      {/* circular highlight behind active tab */}
       <div style={{ position: "absolute", top: "50%", left: ind.left + (ind.width / 2) - 22, width: 44, height: 44, transform: `translateY(-50%) scale(${pop ? 1 : 0.82})`, transition: "left 0.28s cubic-bezier(0.2,0.9,0.2,1), transform 0.28s cubic-bezier(0.2,0.9,0.2,1)", borderRadius: 9999, background: "rgba(249,115,22,0.08)", pointerEvents: "none", zIndex: 0 }} />
       {tabs.map(t => (
         <button key={t.key} className="nav-btn" style={{ ...s.navBtn, ...(view === t.key ? s.navBtnActive : {}), position: "relative", zIndex: 1 }} onClick={() => setView(t.key)}>
@@ -154,7 +93,6 @@ export default function App() {
               <h2 style={s.bookingHeaderTitle}>Book Your Detail</h2>
               <p style={s.bookingHeaderSub}>Pick your service, choose a time, and we come to you.</p>
             </div>
-
             <ClientView onBooked={handleBooked} />
             <ShareBanner />
             <FloatingReviews />
@@ -162,8 +100,11 @@ export default function App() {
         )}
         {view === "gallery" && <GalleryView />}
         {view === "reviews" && <ReviewsView />}
-        {view === "admin" && !adminAuthed && <AdminLogin onAuth={() => setAdminAuthed(true)} />}
-        {view === "admin" && adminAuthed && <AdminView />}
+        {view === "admin" && (
+          <Suspense fallback={null}>
+            <AdminRoot adminAuthed={adminAuthed} onAuth={() => setAdminAuthed(true)} />
+          </Suspense>
+        )}
       </main>
 
       {view !== "admin" && (
@@ -287,7 +228,7 @@ function SuccessView({ form, onReset }) {
 }
 
 function ClientView({ onBooked }) {
-  const slots = getAvailableSlots();
+  const slots = useMemo(() => getAvailableSlots(), []);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     client_name: "", client_email: "", client_phone: "", vehicle_type: "",
@@ -305,8 +246,9 @@ function ClientView({ onBooked }) {
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const availableSlots = slots.filter(
-    (s) => !bookedSlots.includes(`${s.date}|${s.time}`)
+  const availableSlots = useMemo(
+    () => slots.filter((sl) => !bookedSlots.includes(`${sl.date}|${sl.time}`)),
+    [slots, bookedSlots]
   );
 
   const submit = async () => {
@@ -458,7 +400,7 @@ function ClientView({ onBooked }) {
             <Row label="Phone" value={form.client_phone} />
             <Row label="Vehicle" value={form.vehicle_type === "sedan" ? "Sedan" : "SUV / Truck"} />
             <Row label="Service" value={form.service_type} />
-            <Row label="Price" value={`$${SERVICES.find(s => s.name === form.service_type)?.prices[form.vehicle_type] ?? "—"}`} />
+            <Row label="Price" value={`$${SERVICES.find(sv => sv.name === form.service_type)?.prices[form.vehicle_type] ?? "—"}`} />
             <Row label="Date" value={availableSlots.find(sl => sl.date === form.booking_date && sl.time === form.booking_time)?.displayDate || form.booking_date} />
             <Row label="Time" value={form.booking_time} />
             {form.notes && <Row label="Notes" value={form.notes} />}
@@ -481,34 +423,6 @@ function Row({ label, value }) {
     <div style={s.confirmRow}>
       <span style={s.confirmLabel}>{label}</span>
       <span style={s.confirmValue}>{value}</span>
-    </div>
-  );
-}
-
-function AdminLogin({ onAuth }) {
-  const [pw, setPw] = useState("");
-  const [err, setErr] = useState(false);
-  const attempt = () => {
-    if (pw === ADMIN_PASSWORD) { onAuth(); }
-    else { setErr(true); setPw(""); }
-  };
-  return (
-    <div style={{ ...s.card, maxWidth: 360, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
-      <h2 style={s.sectionTitle}>Admin login</h2>
-      <div style={s.fieldGroup}>
-        <label style={s.label}>Password</label>
-        <input
-          style={{ ...s.input, ...(err ? { borderColor: "#EF4444" } : {}) }}
-          type="password"
-          value={pw}
-          onChange={e => { setPw(e.target.value); setErr(false); }}
-          onKeyDown={e => e.key === "Enter" && attempt()}
-          placeholder="Enter password"
-          autoFocus
-        />
-        {err && <span style={{ color: "#EF4444", fontSize: 13 }}>Incorrect password</span>}
-      </div>
-      <button style={s.btnPrimary} onClick={attempt}>Log in</button>
     </div>
   );
 }
@@ -565,7 +479,7 @@ function ReviewsView() {
   };
   useEffect(() => { fetchReviews(); }, []);
 
-  const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : 0;
+  const avg = reviews.length ? (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) : 0;
   const avgDisplay = avg ? avg.toFixed(1) : null;
 
   const submit = async () => {
@@ -730,618 +644,3 @@ function GalleryView() {
     </div>
   );
 }
-
-function PhotoManager() {
-  const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [uploading, setUploading] = useState(false);
-
-  const fetchPhotos = async () => {
-    const { data } = await supabase.storage.from("gallery").list("", { sortBy: { column: "created_at", order: "desc" } });
-    if (data) {
-      setPhotos(data.filter(f => f.name !== ".emptyFolderPlaceholder").map(f => ({
-        name: f.name,
-        url: supabase.storage.from("gallery").getPublicUrl(f.name).data.publicUrl,
-      })));
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchPhotos(); }, []);
-
-  const handleFile = (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
-  };
-
-  const upload = async () => {
-    if (!file) return;
-    setUploading(true);
-    const ext = file.name.split(".").pop();
-    await supabase.storage.from("gallery").upload(`${Date.now()}.${ext}`, file);
-    setFile(null);
-    setPreview(null);
-    setUploading(false);
-    fetchPhotos();
-  };
-
-  const remove = async (name) => {
-    await supabase.storage.from("gallery").remove([name]);
-    setPhotos(p => p.filter(ph => ph.name !== name));
-  };
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div style={s.uploadCard}>
-        <p style={s.uploadLabel}>Add photo</p>
-        <label style={s.uploadZone}>
-          {preview ? (
-            <img src={preview} style={s.uploadPreview} alt="Preview" />
-          ) : (
-            <div style={s.uploadEmpty}>
-              <span style={s.uploadIcon}>↑</span>
-              <span style={{ fontSize: 13, color: "#6B7280" }}>Click to select a photo</span>
-            </div>
-          )}
-          <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
-        </label>
-        {file && (
-          <button style={s.btnPrimary} onClick={upload} disabled={uploading}>
-            {uploading ? "Uploading..." : "Upload photo"}
-          </button>
-        )}
-      </div>
-
-      {loading ? (
-        <p style={s.emptyMsg}>Loading...</p>
-      ) : photos.length === 0 ? (
-        <p style={s.emptyMsg}>No photos uploaded yet.</p>
-      ) : (
-        <div style={s.adminPhotoGrid}>
-          {photos.map(ph => (
-            <div key={ph.name} style={s.adminPhotoCard}>
-              <img src={ph.url} alt="" style={s.adminPhotoImg} />
-              <button style={s.deletePhotoBtn} onClick={() => remove(ph.name)}>✕</button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function AdminAddBooking({ onDone }) {
-  const [form, setForm] = useState({
-    client_name: "", client_phone: "", client_email: "",
-    vehicle_type: "sedan", service_type: "",
-    booking_date: new Date().toISOString().split("T")[0],
-    booking_time: "", notes: "", status: "completed",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const svc = SERVICES.find(sv => sv.name === form.service_type);
-  const price = svc ? svc.prices[form.vehicle_type] : null;
-
-  const submit = async () => {
-    if (!form.client_name || !form.service_type || !form.booking_date || !form.booking_time) {
-      setError("Name, service, date, and time are required.");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    const { error: err } = await supabase.from("bookings").insert([{
-      client_name: form.client_name,
-      client_email: form.client_email || null,
-      client_phone: form.client_phone || null,
-      service_type: form.service_type,
-      booking_date: form.booking_date,
-      booking_time: form.booking_time,
-      notes: `[vehicle:${form.vehicle_type}]${form.notes ? "\n" + form.notes : ""}`,
-      status: form.status,
-    }]);
-    setLoading(false);
-    if (err) { setError("Something went wrong. Please try again."); return; }
-    onDone();
-  };
-
-  return (
-    <div style={s.card}>
-      <div style={s.formSection}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={s.sectionTitle}>Add Service</h2>
-          <button style={s.btnSecondary} onClick={onDone}>Cancel</button>
-        </div>
-
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Client name</label>
-          <input style={s.input} value={form.client_name} onChange={e => set("client_name", e.target.value)} placeholder="Jane Smith" />
-        </div>
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Phone <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
-          <input style={s.input} type="tel" value={form.client_phone} onChange={e => set("client_phone", e.target.value)} placeholder="(555) 000-0000" />
-        </div>
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Email <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
-          <input style={s.input} type="email" value={form.client_email} onChange={e => set("client_email", e.target.value)} placeholder="you@example.com" />
-        </div>
-
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Vehicle type</label>
-          <div style={s.vehicleToggle}>
-            {["sedan", "suv"].map(v => (
-              <button key={v} style={{ ...s.vehicleBtn, ...(form.vehicle_type === v ? s.vehicleBtnActive : {}) }} onClick={() => set("vehicle_type", v)}>
-                {v === "sedan" ? "Sedan" : "SUV / Truck"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Service</label>
-          <div style={s.serviceGrid}>
-            {SERVICES.map(sv => (
-              <button key={sv.id} className="svc-card" style={{ ...s.serviceCard, ...(form.service_type === sv.name ? s.serviceCardActive : {}) }} onClick={() => set("service_type", sv.name)}>
-                <span style={s.serviceName}>{sv.name}</span>
-                <div style={s.serviceMeta}>
-                  <span style={s.servicePrice}>${sv.prices[form.vehicle_type]}</span>
-                  <span style={s.serviceDuration}>{sv.duration}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-          {price !== null && <div style={{ fontSize: 13, color: "#86EFAC", fontWeight: 700, marginTop: 6 }}>Price: ${price}</div>}
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div style={s.fieldGroup}>
-            <label style={s.label}>Date</label>
-            <input style={s.input} type="date" value={form.booking_date} onChange={e => set("booking_date", e.target.value)} />
-            <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 6 }}>Admin can enter any date here for custom bookings.</div>
-          </div>
-          <div style={s.fieldGroup}>
-            <label style={s.label}>Time</label>
-            <input style={s.input} value={form.booking_time} onChange={e => set("booking_time", e.target.value)} placeholder="e.g. 10:00 AM" />
-            <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 6 }}>Enter any time for the booking; regular clients still use available slots.</div>
-          </div>
-        </div>
-
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Status</label>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {["completed", "confirmed", "pending"].map(st => (
-              <button key={st} style={{ ...s.filterBtn, ...(form.status === st ? s.filterBtnActive : {}) }} onClick={() => set("status", st)}>{st}</button>
-            ))}
-          </div>
-        </div>
-
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Notes <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
-          <textarea style={{ ...s.input, minHeight: 80, resize: "vertical" }} value={form.notes} onChange={e => set("notes", e.target.value)} placeholder="Car make/model, special requests..." />
-        </div>
-
-        {error && <div style={s.errorBox}>{error}</div>}
-        <button style={{ ...s.btnPrimary, ...(!form.client_name || !form.service_type || !form.booking_date || !form.booking_time ? s.btnDisabled : {}) }} disabled={loading || !form.client_name || !form.service_type || !form.booking_date || !form.booking_time} onClick={submit}>
-          {loading ? "Adding..." : "Add Service"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function AdminView() {
-  const [tab, setTab] = useState("bookings");
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
-  const [adding, setAdding] = useState(false);
-
-  const fetchBookings = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from("bookings")
-      .select("*")
-      .order("booking_date", { ascending: true })
-      .order("booking_time", { ascending: true });
-    setBookings(data || []);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchBookings(); }, []);
-
-  const updateStatus = async (id, status) => {
-    await supabase.from("bookings").update({ status }).eq("id", id);
-    setBookings(b => b.map(bk => bk.id === id ? { ...bk, status } : bk));
-  };
-
-  const archiveBooking = async (id) => {
-    if (!window.confirm("Archive this booking? You can restore it later from Archived.")) return;
-    await supabase.from("bookings").update({ status: "archived" }).eq("id", id);
-    setBookings(b => b.map(bk => bk.id === id ? { ...bk, status: "archived" } : bk));
-  };
-
-  const deleteBooking = async (id) => {
-    if (!window.confirm("Delete this booking permanently? This cannot be undone.")) return;
-    await supabase.from("bookings").delete().eq("id", id);
-    setBookings(b => b.filter(bk => bk.id !== id));
-  };
-
-  const restoreBooking = async (id) => {
-    await supabase.from("bookings").update({ status: "pending" }).eq("id", id);
-    setBookings(b => b.map(bk => bk.id === id ? { ...bk, status: "pending" } : bk));
-  };
-
-  const filtered = filter === "all" ? bookings.filter(b => b.status !== "archived") : bookings.filter(b => b.status === filter);
-  const counts = bookings.reduce((acc, b) => { acc[b.status] = (acc[b.status] || 0) + 1; return acc; }, {});
-  const completedBookings = bookings.filter(b => b.status === "completed");
-  const revenue = completedBookings.reduce((sum, b) => sum + (getPriceFromBooking(b) ?? 0), 0);
-
-  return (
-    <div>
-      <div style={s.adminTopBar}>
-        <h1 style={s.adminTitle}>Admin</h1>
-        <div style={{ display: "flex", gap: 8 }}>
-          {tab === "bookings" && !adding && (
-            <>
-              <button style={s.addServiceBtn} onClick={() => setAdding(true)}>+ Add Service</button>
-              <button style={s.refreshBtn} onClick={fetchBookings}>↻ Refresh</button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div style={s.adminTabRow}>
-        {["bookings", "archived", "gallery"].map(t => (
-          <button key={t} style={{ ...s.adminTab, ...(tab === t ? s.adminTabActive : {}) }} onClick={() => { setTab(t); setAdding(false); }}>
-            {t === "bookings" ? "Bookings" : t === "archived" ? "Archived" : "Gallery Photos"}
-          </button>
-        ))}
-      </div>
-
-      {tab === "gallery" && <PhotoManager />}
-
-      {tab === "bookings" && adding && (
-        <AdminAddBooking onDone={() => { setAdding(false); fetchBookings(); }} />
-      )}
-
-      {tab === "bookings" && !adding && (
-        <>
-          <div style={s.statsRow}>
-            {[["total", bookings.length, "#F97316"], ["pending", counts.pending || 0, "#FB923C"], ["confirmed", counts.confirmed || 0, "#60A5FA"], ["completed", counts.completed || 0, "#86EFAC"]].map(([label, count, color]) => (
-              <div key={label} style={s.statCard}>
-                <span style={{ ...s.statNum, color }}>{count}</span>
-                <span style={s.statLabel}>{label}</span>
-              </div>
-            ))}
-          </div>
-
-          <div style={s.revenueCard}>
-            <div>
-              <div style={s.revenueLabel}>Revenue · Completed Jobs</div>
-              <div style={s.revenueSub}>{completedBookings.length} job{completedBookings.length !== 1 ? "s" : ""} completed</div>
-            </div>
-            <div style={s.revenueAmount}>${revenue.toLocaleString()}</div>
-          </div>
-
-          <div style={s.filterRow}>
-            {["all", "pending", "confirmed", "completed", "cancelled"].map(f => (
-              <button key={f} style={{ ...s.filterBtn, ...(filter === f ? s.filterBtnActive : {}) }} onClick={() => setFilter(f)}>{f}</button>
-            ))}
-          </div>
-
-          {loading ? (
-            <p style={s.emptyMsg}>Loading...</p>
-          ) : filtered.length === 0 ? (
-            <p style={s.emptyMsg}>No bookings found.</p>
-          ) : (
-            <div style={s.bookingList}>
-              {filtered.map(b => {
-                const st = STATUS_STYLES[b.status] || STATUS_STYLES.pending;
-                const bPrice = getPriceFromBooking(b);
-                const notesDisplay = cleanNotes(b.notes);
-                return (
-                  <div key={b.id} style={s.bookingCard}>
-                    <div style={s.bookingTop}>
-                      <div>
-                        <div style={s.bookingName}>{b.client_name}</div>
-                        <div style={s.bookingDate}>
-                          {new Date(b.booking_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · {b.booking_time}
-                        </div>
-                      </div>
-                      <div style={s.bookingTopActions}>
-                        <span style={{ ...s.badge, background: st.bg, color: st.color }}>{st.label}</span>
-                        <button style={s.trashBtn} onClick={() => archiveBooking(b.id)} title="Archive booking">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M5 4h14v4H5z" />
-                            <path d="M7 8v11a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V8" />
-                            <path d="M10 11v6" />
-                            <path d="M14 11v6" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    <div style={s.bookingBody}>
-                      <div style={s.bookingDetail}>
-                        <strong>Service:</strong> {b.service_type}
-                        {bPrice !== null && <span style={{ color: "#86EFAC", marginLeft: 8, fontWeight: 700 }}>${bPrice}</span>}
-                      </div>
-                      {b.client_email && <div style={s.bookingDetail}><strong>Email:</strong> {b.client_email}</div>}
-                      {b.client_phone && <div style={s.bookingDetail}><strong>Phone:</strong> {b.client_phone}</div>}
-                      {notesDisplay && <div style={s.bookingDetail}><strong>Notes:</strong> {notesDisplay}</div>}
-                    </div>
-                    <div style={s.bookingActions}>
-                      <span style={s.actionLabel}>Update status:</span>
-                      <select style={s.statusSelect} value={b.status} onChange={e => updateStatus(b.id, e.target.value)}>
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
-
-      {tab === "archived" && (
-        <>
-          <div style={s.statsRow}>
-            <div style={s.statCard}>
-              <span style={{ ...s.statNum, color: "#A3A3A3" }}>{bookings.filter(b => b.status === "archived").length}</span>
-              <span style={s.statLabel}>Archived</span>
-            </div>
-          </div>
-
-          {loading ? (
-            <p style={s.emptyMsg}>Loading...</p>
-          ) : bookings.filter(b => b.status === "archived").length === 0 ? (
-            <p style={s.emptyMsg}>No archived bookings yet.</p>
-          ) : (
-            <div style={s.bookingList}>
-              {bookings.filter(b => b.status === "archived").map(b => {
-                const st = STATUS_STYLES[b.status] || STATUS_STYLES.pending;
-                const bPrice = getPriceFromBooking(b);
-                const notesDisplay = cleanNotes(b.notes);
-                return (
-                  <div key={b.id} style={s.bookingCard}>
-                    <div style={s.bookingTop}>
-                      <div>
-                        <div style={s.bookingName}>{b.client_name}</div>
-                        <div style={s.bookingDate}>
-                          {new Date(b.booking_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · {b.booking_time}
-                        </div>
-                      </div>
-                      <div style={s.bookingTopActions}>
-                        <span style={{ ...s.badge, background: st.bg, color: st.color }}>{st.label}</span>
-                        <button style={s.trashBtn} onClick={() => restoreBooking(b.id)} title="Restore booking">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 12h3l3 9 3-18 3 18 3-9h3" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    <div style={s.bookingBody}>
-                      <div style={s.bookingDetail}>
-                        <strong>Service:</strong> {b.service_type}
-                        {bPrice !== null && <span style={{ color: "#86EFAC", marginLeft: 8, fontWeight: 700 }}>${bPrice}</span>}
-                      </div>
-                      {b.client_email && <div style={s.bookingDetail}><strong>Email:</strong> {b.client_email}</div>}
-                      {b.client_phone && <div style={s.bookingDetail}><strong>Phone:</strong> {b.client_phone}</div>}
-                      {notesDisplay && <div style={s.bookingDetail}><strong>Notes:</strong> {notesDisplay}</div>}
-                    </div>
-                    <div style={s.bookingActions}>
-                      <button style={{ ...s.filterBtn, borderRadius: 6, padding: "8px 12px" }} onClick={() => deleteBooking(b.id)}>Delete permanently</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-const s = {
-  app: { minHeight: "100vh", background: "#080808", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" },
-
-  // Header
-  header: { background: "#080808", borderBottom: "1px solid #171717", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 72, position: "sticky", top: 0, zIndex: 10 },
-  logo: { display: "flex", alignItems: "center", gap: 12 },
-  logoImg: { height: 48, width: 48, borderRadius: "50%", objectFit: "cover", flexShrink: 0 },
-  logoName: { fontSize: 15, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em" },
-  nav: { display: "flex", height: "100%", gap: 2, alignItems: "center" },
-  navBtn: { padding: "8px 16px", border: "none", background: "transparent", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#666", fontFamily: "inherit", display: "flex", alignItems: "center", height: "auto", borderRadius: 8, transition: "color 0.15s" },
-  navBtnActive: { color: "#FFFFFF" },
-  backBtn: { padding: "7px 16px", borderRadius: 8, border: "1px solid #1C1C1C", background: "transparent", cursor: "pointer", fontSize: 13, color: "#666", fontFamily: "inherit" },
-  main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
-
-  // Hero
-  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "56px 24px 48px", marginBottom: 32 },
-  heroLogoWrap: { marginBottom: 4 },
-  heroLogo: { width: 100, height: 100, borderRadius: "50%", objectFit: "cover", border: "2px solid #1C1C1C", display: "block" },
-  heroTitle: { fontSize: 52, fontWeight: 800, color: "#F0F0F0", letterSpacing: "-0.04em", margin: 0, textAlign: "center", lineHeight: 1.0 },
-  heroRule: { display: "flex", alignItems: "center", gap: 14, width: "100%", maxWidth: 320, margin: "4px 0" },
-  heroRuleLine: { flex: 1, height: 1, background: "#1C1C1C" },
-  heroStats: { fontSize: 10, color: "#555", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap" },
-  phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, border: "1px solid #1C1C1C", background: "#0D0D0D", color: "#F0F0F0", fontSize: 16, fontWeight: 600, textDecoration: "none", marginTop: 4 },
-  socialRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" },
-  socialBtn: { display: "flex", alignItems: "center", gap: 7, padding: "8px 16px", borderRadius: 8, border: "1px solid #1A1A1A", background: "transparent", color: "#555", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit", transition: "color 0.15s, border-color 0.15s" },
-  footer: { textAlign: "center", paddingBottom: 28 },
-  adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1C1C1C", fontFamily: "inherit" },
-
-  // Booking section header
-  bookingHeader: { marginBottom: 16 },
-  bookingHeaderTop: { display: "flex", alignItems: "center", gap: 12, marginBottom: 6 },
-  bookingHeaderTitle: { fontSize: 26, fontWeight: 800, color: "#F0F0F0", margin: "0 0 6px", letterSpacing: "-0.03em" },
-  bookingHeaderBadge: { display: "none" },
-  bookingHeaderSub: { fontSize: 14, color: "#555", margin: 0 },
-
-  // Value props strip
-  valueRow: { display: "flex", background: "#0D0D0D", border: "1px solid #181818", borderRadius: 14, marginBottom: 36, overflow: "hidden" },
-  valueItem: { flex: 1, display: "flex", alignItems: "center", gap: 14, padding: "20px 22px" },
-  valueIconWrap: { width: 36, height: 36, borderRadius: 8, background: "rgba(249,115,22,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 2 },
-  valueSub: { fontSize: 11, color: "#666", lineHeight: 1.4 },
-  valueSep: {},
-
-  // Share banner
-  shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0D0D0D", border: "1px solid #181818", borderRadius: 14, padding: "24px 28px", marginTop: 32, flexWrap: "wrap" },
-  shareTitle: { fontSize: 16, fontWeight: 700, color: "#EEEEEE", marginBottom: 4, letterSpacing: "-0.01em" },
-  shareSub: { fontSize: 13, color: "#555" },
-  shareBtn: { display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", background: "#F97316", color: "#fff", border: "none", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", flexShrink: 0 },
-  shareBtnCopied: { background: "#14532D", color: "#86EFAC" },
-
-  // Card — clean, no decorative accent
-  card: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 14, padding: "36px 32px" },
-
-  // Step progress bar
-  stepBar: { display: "flex", justifyContent: "space-between", marginBottom: 36, position: "relative" },
-  stepLine: { position: "absolute", top: 13, left: "calc(12.5% + 14px)", right: "calc(12.5% + 14px)", height: 1, background: "#1A1A1A" },
-  stepItem: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flex: 1, position: "relative", zIndex: 1 },
-  stepDot: { width: 28, height: 28, borderRadius: "50%", border: "1px solid #222", background: "#0D0D0D", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#555" },
-  stepActive: { border: "2px solid #F97316", color: "#F97316" },
-  stepDone: { background: "#F97316", border: "2px solid #F97316", color: "#fff" },
-  stepLabel: { fontSize: 11, color: "#555", fontWeight: 500, textAlign: "center" },
-  stepLabelActive: { color: "#EEEEEE", fontWeight: 600 },
-
-  // Form
-  formSection: { display: "flex", flexDirection: "column", gap: 24 },
-  sectionTitle: { fontSize: 22, fontWeight: 800, color: "#F0F0F0", margin: "0 0 4px", letterSpacing: "-0.025em" },
-  fieldGroup: { display: "flex", flexDirection: "column", gap: 8 },
-  label: { fontSize: 11, fontWeight: 600, color: "#666", letterSpacing: "0.05em", textTransform: "uppercase" },
-  input: { padding: "12px 14px", border: "1px solid #1C1C1C", borderRadius: 9, fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box", width: "100%", background: "#080808", color: "#EEEEEE", transition: "border-color 0.15s" },
-
-  // Service cards
-  serviceGrid: { display: "flex", flexDirection: "column", gap: 8 },
-  serviceCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 18px", border: "1px solid #1C1C1C", borderRadius: 10, background: "#090909", cursor: "pointer", fontFamily: "inherit", textAlign: "left", transition: "border-color 0.15s" },
-  serviceCardActive: { border: "1px solid rgba(249,115,22,0.45)", background: "#0E0E0E" },
-  serviceName: { fontSize: 14, fontWeight: 600, color: "#EEEEEE" },
-  serviceMeta: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 },
-  servicePrice: { fontSize: 22, fontWeight: 800, color: "#F97316", letterSpacing: "-0.02em" },
-  serviceDuration: { fontSize: 10, color: "#666", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" },
-
-  // Vehicle toggle
-  vehicleToggle: { display: "flex", background: "#080808", border: "1px solid #1C1C1C", borderRadius: 10, padding: 3 },
-  vehicleBtn: { flex: 1, padding: "10px 16px", border: "none", borderRadius: 8, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#555", fontFamily: "inherit", transition: "all 0.15s" },
-  vehicleBtnActive: { background: "#181818", color: "#EEEEEE" },
-
-  // Time slots
-  slotGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: 8 },
-  slotCard: { padding: "14px 16px", border: "1px solid #1C1C1C", borderRadius: 10, background: "#090909", cursor: "pointer", textAlign: "left", fontFamily: "inherit", display: "flex", flexDirection: "column", gap: 4, transition: "border-color 0.15s" },
-  slotCardActive: { border: "1px solid rgba(249,115,22,0.45)", background: "#0E0E0E" },
-  slotDate: { fontSize: 13, fontWeight: 600, color: "#EEEEEE" },
-  slotTime: { fontSize: 11, color: "#F97316", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" },
-
-  // Confirm card
-  confirmCard: { border: "1px solid #1C1C1C", borderRadius: 10, overflow: "hidden" },
-  confirmRow: { display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #111" },
-  confirmLabel: { fontSize: 10, color: "#666", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" },
-  confirmValue: { fontSize: 13, color: "#EEEEEE", fontWeight: 600, textAlign: "right", maxWidth: "60%" },
-
-  // Buttons
-  btnRow: { display: "flex", gap: 10, justifyContent: "flex-end" },
-  btnPrimary: { padding: "13px 28px", background: "#F97316", color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "background 0.15s" },
-  btnSecondary: { padding: "13px 22px", background: "transparent", color: "#666", border: "1px solid #1C1C1C", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" },
-  btnDisabled: { opacity: 0.2, cursor: "not-allowed" },
-  errorBox: { background: "#180000", border: "1px solid #350000", color: "#FC8181", padding: "12px 14px", borderRadius: 8, fontSize: 13 },
-
-  // Success page
-  successView: { display: "flex", flexDirection: "column", alignItems: "center", padding: "60px 24px 40px", textAlign: "center" },
-  successIconLarge: { width: 72, height: 72, borderRadius: "50%", background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, marginBottom: 28, color: "#fff", fontWeight: 700 },
-  successIcon: { width: 56, height: 56, borderRadius: "50%", background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, margin: "0 auto 20px", color: "#fff", fontWeight: 700 },
-  successTitle: { fontSize: 32, fontWeight: 800, color: "#F0F0F0", margin: "0 0 16px", letterSpacing: "-0.03em" },
-  successBody: { fontSize: 15, color: "#666", margin: "0 0 8px", lineHeight: 1.7, maxWidth: 420 },
-  successSub: { fontSize: 13, color: "#555", margin: "0 0 36px" },
-  successActions: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 32 },
-  successNav: { fontSize: 12, color: "#444", maxWidth: 340 },
-  emptyMsg: { textAlign: "center", color: "#555", padding: "40px 0", fontSize: 14 },
-
-  // Gallery & section headers
-  galleryHero: { textAlign: "center", marginBottom: 32, paddingTop: 40 },
-  galleryHeroTitle: { fontSize: 36, fontWeight: 800, color: "#F0F0F0", margin: "0 0 8px", letterSpacing: "-0.035em" },
-  galleryHeroSub: { fontSize: 12, color: "#555", fontWeight: 500, margin: 0 },
-  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 8 },
-  photoLink: { display: "block", borderRadius: 10, overflow: "hidden", height: 180, border: "1px solid #151515" },
-  photoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
-
-  // Floating reviews
-  floatingWrap: { position: "fixed", right: 20, top: "50%", marginTop: -90, zIndex: 5, width: 220 },
-  floatingCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 12, padding: "14px 16px" },
-  floatingStars: { color: "#F97316", fontSize: 12, letterSpacing: 2, marginBottom: 8 },
-  floatingComment: { fontSize: 12, color: "#777", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
-  floatingName: { fontSize: 10, color: "#555", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" },
-
-  // Reviews
-  reviewStats: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 14, padding: "28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
-  reviewAvgBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 80 },
-  reviewAvgNum: { fontSize: 40, fontWeight: 800, color: "#F0F0F0", lineHeight: 1, letterSpacing: "-0.04em" },
-  reviewAvgStars: { display: "flex", gap: 2 },
-  reviewCount: { fontSize: 10, color: "#555", fontWeight: 600, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.08em" },
-  reviewBars: { flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 200 },
-  reviewBarRow: { display: "flex", alignItems: "center", gap: 10 },
-  reviewBarLabel: { fontSize: 11, color: "#666", width: 24, textAlign: "right", flexShrink: 0, fontWeight: 600 },
-  reviewBarTrack: { flex: 1, height: 4, background: "#141414", borderRadius: 99, overflow: "hidden" },
-  reviewBarFill: { height: "100%", background: "#F97316", borderRadius: 99, transition: "width 0.6s ease" },
-  reviewBarCount: { fontSize: 11, color: "#555", width: 20, flexShrink: 0 },
-  starPicker: { display: "flex", gap: 0, marginTop: 4 },
-  starPickBtn: { background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 },
-  anonRow: { display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginTop: 6 },
-  reviewCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 12, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 },
-  reviewCardTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" },
-  reviewerName: { fontSize: 14, fontWeight: 700, color: "#EEEEEE", marginBottom: 4 },
-  reviewDate: { fontSize: 10, color: "#555", flexShrink: 0, fontWeight: 600, letterSpacing: "0.04em" },
-  reviewComment: { fontSize: 14, color: "#777", lineHeight: 1.6, margin: 0 },
-
-  // Admin
-  adminTopBar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  adminTitle: { fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: 0, letterSpacing: "-0.02em" },
-  refreshBtn: { padding: "7px 14px", background: "transparent", border: "1px solid #1C1C1C", borderRadius: 8, cursor: "pointer", fontSize: 11, color: "#666", fontFamily: "inherit" },
-  addServiceBtn: { padding: "7px 14px", background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 11, color: "#F97316", fontFamily: "inherit", fontWeight: 700 },
-  statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 14 },
-  revenueCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderLeft: "3px solid #86EFAC", borderRadius: 12, padding: "16px 22px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between" },
-  revenueLabel: { fontSize: 9, color: "#666", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 4 },
-  revenueAmount: { fontSize: 34, fontWeight: 800, color: "#86EFAC", letterSpacing: "-0.03em" },
-  revenueSub: { fontSize: 11, color: "#555" },
-  statCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 10, padding: "18px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
-  statNum: { fontSize: 30, fontWeight: 800, letterSpacing: "-0.03em" },
-  statLabel: { fontSize: 9, color: "#666", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em" },
-  filterRow: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" },
-  filterBtn: { padding: "5px 14px", borderRadius: 20, border: "1px solid #1C1C1C", background: "transparent", cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#666", textTransform: "capitalize", fontFamily: "inherit" },
-  filterBtnActive: { background: "#181818", color: "#EEEEEE", borderColor: "#282828" },
-  bookingList: { display: "flex", flexDirection: "column", gap: 10 },
-  bookingCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 12, padding: "16px 20px" },
-  bookingTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
-  bookingName: { fontSize: 15, fontWeight: 700, color: "#EEEEEE", marginBottom: 2 },
-  bookingDate: { fontSize: 12, color: "#666" },
-  badge: { padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" },
-  bookingBody: { display: "flex", flexDirection: "column", gap: 4, marginBottom: 14, paddingBottom: 14, borderBottom: "1px solid #131313" },
-  bookingDetail: { fontSize: 13, color: "#777" },
-  bookingActions: { display: "flex", alignItems: "center", gap: 10 },
-  actionLabel: { fontSize: 9, color: "#555", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" },
-  statusSelect: { padding: "6px 10px", border: "1px solid #1C1C1C", borderRadius: 7, fontSize: 13, fontFamily: "inherit", cursor: "pointer", background: "#080808", color: "#EEEEEE" },
-  bookingTopActions: { display: "flex", alignItems: "center", gap: 8 },
-  trashBtn: { display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 8, border: "1px solid #222", background: "#0A0A0A", color: "#F87171", cursor: "pointer" },
-  adminTabRow: { display: "flex", marginBottom: 24, borderBottom: "1px solid #151515" },
-  adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#666", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase" },
-  adminTabActive: { color: "#EEEEEE", borderBottomColor: "#F97316" },
-  uploadCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 12, padding: 20, display: "flex", flexDirection: "column", gap: 14 },
-  uploadLabel: { fontSize: 10, fontWeight: 700, color: "#666", margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" },
-  uploadZone: { display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 8, border: "1px dashed #1C1C1C", overflow: "hidden", minHeight: 160 },
-  uploadEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: 32 },
-  uploadIcon: { fontSize: 24, color: "#F97316" },
-  uploadPreview: { width: "100%", maxHeight: 260, objectFit: "contain", display: "block" },
-  adminPhotoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 },
-  adminPhotoCard: { position: "relative", borderRadius: 8, overflow: "hidden", aspectRatio: "1" },
-  adminPhotoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
-  deletePhotoBtn: { position: "absolute", top: 6, right: 6, width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.85)", border: "1px solid #1E1E1E", color: "#bbb", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit", lineHeight: 1 },
-};
