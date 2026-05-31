@@ -86,7 +86,7 @@ function NavTabs({ view, setView }) {
       {/* circular highlight behind active tab */}
       <div style={{ position: "absolute", top: "50%", left: ind.left + (ind.width / 2) - 22, width: 44, height: 44, transform: `translateY(-50%) scale(${pop ? 1 : 0.82})`, transition: "left 0.28s cubic-bezier(0.2,0.9,0.2,1), transform 0.28s cubic-bezier(0.2,0.9,0.2,1)", borderRadius: 9999, background: "rgba(249,115,22,0.08)", pointerEvents: "none", zIndex: 0 }} />
       {tabs.map(t => (
-        <button key={t.key} style={{ ...s.navBtn, ...(view === t.key ? s.navBtnActive : {}), position: "relative", zIndex: 1 }} onClick={() => setView(t.key)}>
+        <button key={t.key} className="nav-btn" style={{ ...s.navBtn, ...(view === t.key ? s.navBtnActive : {}), position: "relative", zIndex: 1 }} onClick={() => setView(t.key)}>
           {t.label}
         </button>
       ))}
@@ -139,11 +139,11 @@ export default function App() {
                 (703) 376-7536
               </a>
               <div style={s.socialRow}>
-                <a href="https://instagram.com/ch.autodetails" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
+                <a href="https://instagram.com/ch.autodetails" target="_blank" rel="noopener noreferrer" style={s.socialBtn} className="social-btn">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
                   @ch.autodetails
                 </a>
-                <a href="https://www.facebook.com/people/CH-Elite-Auto-Detailing/61572140056742/" target="_blank" rel="noopener noreferrer" style={s.socialBtn}>
+                <a href="https://www.facebook.com/people/CH-Elite-Auto-Detailing/61572140056742/" target="_blank" rel="noopener noreferrer" style={s.socialBtn} className="social-btn">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                   C&H Elite Auto Detailing
                 </a>
@@ -151,12 +151,10 @@ export default function App() {
             </div>
             <ValueProps />
             <div style={s.bookingHeader}>
-              <div style={s.bookingHeaderTop}>
-                <h2 style={s.bookingHeaderTitle}>Book Your Detail</h2>
-                <span style={s.bookingHeaderBadge}>Takes 2 minutes</span>
-              </div>
-              <p style={s.bookingHeaderSub}>Pick your service, choose a time, and we'll come to you.</p>
+              <h2 style={s.bookingHeaderTitle}>Book Your Detail</h2>
+              <p style={s.bookingHeaderSub}>Pick your service, choose a time, and we come to you.</p>
             </div>
+
             <ClientView onBooked={handleBooked} />
             <ShareBanner />
             <FloatingReviews />
@@ -389,6 +387,7 @@ function ClientView({ onBooked }) {
             {SERVICES.map(svc => (
               <button
                 key={svc.id}
+                className="svc-card"
                 style={{ ...s.serviceCard, ...(form.service_type === svc.name ? s.serviceCardActive : {}) }}
                 onClick={() => set("service_type", svc.name)}
               >
@@ -423,6 +422,7 @@ function ClientView({ onBooked }) {
               {availableSlots.map((slot, i) => (
                 <button
                   key={i}
+                  className="slot-card"
                   style={{ ...s.slotCard, ...(form.booking_date === slot.date && form.booking_time === slot.time ? s.slotCardActive : {}) }}
                   onClick={() => { set("booking_date", slot.date); set("booking_time", slot.time); }}
                 >
@@ -722,7 +722,7 @@ function GalleryView() {
         <div style={s.photoGrid}>
           {photos.map(ph => (
             <a key={ph.name} href={ph.url} target="_blank" rel="noopener noreferrer" style={s.photoLink}>
-              <img src={ph.url} alt="Detailing work" style={s.photoImg} />
+              <img src={ph.url} alt="Detailing work" style={s.photoImg} loading="lazy" />
             </a>
           ))}
         </div>
@@ -886,7 +886,7 @@ function AdminAddBooking({ onDone }) {
           <label style={s.label}>Service</label>
           <div style={s.serviceGrid}>
             {SERVICES.map(sv => (
-              <button key={sv.id} style={{ ...s.serviceCard, ...(form.service_type === sv.name ? s.serviceCardActive : {}) }} onClick={() => set("service_type", sv.name)}>
+              <button key={sv.id} className="svc-card" style={{ ...s.serviceCard, ...(form.service_type === sv.name ? s.serviceCardActive : {}) }} onClick={() => set("service_type", sv.name)}>
                 <span style={s.serviceName}>{sv.name}</span>
                 <div style={s.serviceMeta}>
                   <span style={s.servicePrice}>${sv.prices[form.vehicle_type]}</span>
@@ -1154,189 +1154,189 @@ function AdminView() {
 const s = {
   app: { minHeight: "100vh", background: "#080808", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" },
 
-  // Header — thin orange top accent, underline nav
-  header: { background: "#080808", borderTop: "2px solid #F97316", borderBottom: "1px solid #141414", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 58, position: "sticky", top: 0, zIndex: 10 },
-  logo: { display: "flex", alignItems: "center", gap: 10 },
-  logoImg: { height: 32, width: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid #1E1E1E" },
-  logoName: { fontSize: 14, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em" },
-  nav: { display: "flex", height: "100%", gap: 6, alignItems: "center" },
-  navBtn: { padding: "10px 20px", border: "1px solid transparent", background: "rgba(255,255,255,0.04)", cursor: "pointer", fontSize: 14, fontWeight: 700, color: "#E5E7EB", fontFamily: "inherit", display: "flex", alignItems: "center", height: "auto", borderRadius: 9999, transition: "all 0.18s ease" },
-  navBtnActive: { color: "#FFFFFF", background: "transparent", borderColor: "transparent", transform: "translateY(-1px)", boxShadow: "0 6px 18px rgba(0,0,0,0.25)" },
-  backBtn: { padding: "7px 16px", borderRadius: 7, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 13, color: "#888", fontFamily: "inherit" },
+  // Header
+  header: { background: "#080808", borderBottom: "1px solid #171717", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 72, position: "sticky", top: 0, zIndex: 10 },
+  logo: { display: "flex", alignItems: "center", gap: 12 },
+  logoImg: { height: 48, width: 48, borderRadius: "50%", objectFit: "cover", flexShrink: 0 },
+  logoName: { fontSize: 15, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.01em" },
+  nav: { display: "flex", height: "100%", gap: 2, alignItems: "center" },
+  navBtn: { padding: "8px 16px", border: "none", background: "transparent", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#666", fontFamily: "inherit", display: "flex", alignItems: "center", height: "auto", borderRadius: 8, transition: "color 0.15s" },
+  navBtnActive: { color: "#FFFFFF" },
+  backBtn: { padding: "7px 16px", borderRadius: 8, border: "1px solid #1C1C1C", background: "transparent", cursor: "pointer", fontSize: 13, color: "#666", fontFamily: "inherit" },
   main: { maxWidth: 720, margin: "0 auto", padding: "0 20px 80px" },
 
-  // Hero — dot grid background, big bold typography
-  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "44px 24px 36px", marginBottom: 28, backgroundImage: "radial-gradient(circle, #1A1A1A 1px, transparent 1px)", backgroundSize: "24px 24px", borderRadius: 16, position: "relative" },
-  heroLogoWrap: { padding: 6, borderRadius: "50%", border: "1px solid rgba(249,115,22,0.2)" },
-  heroLogo: { width: 90, height: 90, borderRadius: "50%", objectFit: "cover", border: "1px solid #1E1E1E", display: "block" },
-  heroTitle: { fontSize: 46, fontWeight: 800, color: "#EEEEEE", letterSpacing: "-0.035em", margin: 0, textAlign: "center", lineHeight: 1.05 },
-  heroRule: { display: "flex", alignItems: "center", gap: 14, width: "100%", maxWidth: 380 },
-  heroRuleLine: { flex: 1, height: 1, background: "#1A1A1A" },
-  heroStats: { fontSize: 10, color: "#888888", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", whiteSpace: "nowrap" },
-  phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 8, border: "1px solid #1E1E1E", background: "#0C0C0C", color: "#EEEEEE", fontSize: 15, fontWeight: 600, textDecoration: "none", marginTop: 2 },
+  // Hero
+  hero: { display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "56px 24px 48px", marginBottom: 32 },
+  heroLogoWrap: { marginBottom: 4 },
+  heroLogo: { width: 100, height: 100, borderRadius: "50%", objectFit: "cover", border: "2px solid #1C1C1C", display: "block" },
+  heroTitle: { fontSize: 52, fontWeight: 800, color: "#F0F0F0", letterSpacing: "-0.04em", margin: 0, textAlign: "center", lineHeight: 1.0 },
+  heroRule: { display: "flex", alignItems: "center", gap: 14, width: "100%", maxWidth: 320, margin: "4px 0" },
+  heroRuleLine: { flex: 1, height: 1, background: "#1C1C1C" },
+  heroStats: { fontSize: 10, color: "#555", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap" },
+  phoneLink: { display: "flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, border: "1px solid #1C1C1C", background: "#0D0D0D", color: "#F0F0F0", fontSize: 16, fontWeight: 600, textDecoration: "none", marginTop: 4 },
   socialRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" },
-  socialBtn: { display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, border: "1px solid #161616", background: "transparent", color: "#888888", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit" },
+  socialBtn: { display: "flex", alignItems: "center", gap: 7, padding: "8px 16px", borderRadius: 8, border: "1px solid #1A1A1A", background: "transparent", color: "#555", fontSize: 12, fontWeight: 500, textDecoration: "none", fontFamily: "inherit", transition: "color 0.15s, border-color 0.15s" },
   footer: { textAlign: "center", paddingBottom: 28 },
   adminLink: { background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#1C1C1C", fontFamily: "inherit" },
 
   // Booking section header
-  bookingHeader: { marginBottom: 14 },
+  bookingHeader: { marginBottom: 16 },
   bookingHeaderTop: { display: "flex", alignItems: "center", gap: 12, marginBottom: 6 },
-  bookingHeaderTitle: { fontSize: 28, fontWeight: 800, color: "#EEEEEE", margin: 0, letterSpacing: "-0.03em" },
-  bookingHeaderBadge: { fontSize: 11, fontWeight: 700, color: "#F97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 20, padding: "3px 10px", letterSpacing: "0.04em" },
-  bookingHeaderSub: { fontSize: 13, color: "#888888", margin: 0 },
+  bookingHeaderTitle: { fontSize: 26, fontWeight: 800, color: "#F0F0F0", margin: "0 0 6px", letterSpacing: "-0.03em" },
+  bookingHeaderBadge: { display: "none" },
+  bookingHeaderSub: { fontSize: 14, color: "#555", margin: 0 },
 
   // Value props strip
-  valueRow: { display: "flex", background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, marginBottom: 32, overflow: "hidden" },
+  valueRow: { display: "flex", background: "#0D0D0D", border: "1px solid #181818", borderRadius: 14, marginBottom: 36, overflow: "hidden" },
   valueItem: { flex: 1, display: "flex", alignItems: "center", gap: 14, padding: "20px 22px" },
-  valueIconWrap: { width: 38, height: 38, borderRadius: 9, background: "rgba(249,115,22,0.07)", border: "1px solid rgba(249,115,22,0.14)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 3 },
-  valueSub: { fontSize: 11, color: "#888888", lineHeight: 1.45 },
+  valueIconWrap: { width: 36, height: 36, borderRadius: 8, background: "rgba(249,115,22,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  valueTitle: { fontSize: 13, fontWeight: 700, color: "#EEEEEE", marginBottom: 2 },
+  valueSub: { fontSize: 11, color: "#666", lineHeight: 1.4 },
   valueSep: {},
 
   // Share banner
-  shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 12, padding: "22px 26px", marginTop: 32, marginBottom: 0, flexWrap: "wrap" },
-  shareTitle: { fontSize: 16, fontWeight: 700, color: "#EEEEEE", marginBottom: 5, letterSpacing: "-0.01em" },
-  shareSub: { fontSize: 12, color: "#888888" },
-  shareBtn: { display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", flexShrink: 0 },
+  shareBanner: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#0D0D0D", border: "1px solid #181818", borderRadius: 14, padding: "24px 28px", marginTop: 32, flexWrap: "wrap" },
+  shareTitle: { fontSize: 16, fontWeight: 700, color: "#EEEEEE", marginBottom: 4, letterSpacing: "-0.01em" },
+  shareSub: { fontSize: 13, color: "#555" },
+  shareBtn: { display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", background: "#F97316", color: "#fff", border: "none", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap", flexShrink: 0 },
   shareBtnCopied: { background: "#14532D", color: "#86EFAC" },
 
-  // Card — orange top accent border
-  card: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderTop: "3px solid #F97316", borderRadius: 12, padding: "36px 32px" },
+  // Card — clean, no decorative accent
+  card: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 14, padding: "36px 32px" },
 
-  // Step progress bar with connecting line
+  // Step progress bar
   stepBar: { display: "flex", justifyContent: "space-between", marginBottom: 36, position: "relative" },
-  stepLine: { position: "absolute", top: 12, left: "calc(12.5% + 14px)", right: "calc(12.5% + 14px)", height: 1, background: "#1A1A1A" },
+  stepLine: { position: "absolute", top: 13, left: "calc(12.5% + 14px)", right: "calc(12.5% + 14px)", height: 1, background: "#1A1A1A" },
   stepItem: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flex: 1, position: "relative", zIndex: 1 },
-  stepDot: { width: 26, height: 26, borderRadius: "50%", border: "1px solid #1E1E1E", background: "#0C0C0C", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#666666" },
+  stepDot: { width: 28, height: 28, borderRadius: "50%", border: "1px solid #222", background: "#0D0D0D", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#555" },
   stepActive: { border: "2px solid #F97316", color: "#F97316" },
   stepDone: { background: "#F97316", border: "2px solid #F97316", color: "#fff" },
-  stepLabel: { fontSize: 11, color: "#666666", fontWeight: 500, textAlign: "center" },
-  stepLabelActive: { color: "#EEEEEE" },
+  stepLabel: { fontSize: 11, color: "#555", fontWeight: 500, textAlign: "center" },
+  stepLabelActive: { color: "#EEEEEE", fontWeight: 600 },
 
   // Form
-  formSection: { display: "flex", flexDirection: "column", gap: 22 },
-  sectionTitle: { fontSize: 22, fontWeight: 800, color: "#EEEEEE", margin: "0 0 4px", letterSpacing: "-0.02em" },
-  fieldGroup: { display: "flex", flexDirection: "column", gap: 7 },
-  label: { fontSize: 10, fontWeight: 700, color: "#888888", letterSpacing: "0.1em", textTransform: "uppercase" },
-  input: { padding: "11px 14px", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box", width: "100%", background: "#080808", color: "#EEEEEE" },
+  formSection: { display: "flex", flexDirection: "column", gap: 24 },
+  sectionTitle: { fontSize: 22, fontWeight: 800, color: "#F0F0F0", margin: "0 0 4px", letterSpacing: "-0.025em" },
+  fieldGroup: { display: "flex", flexDirection: "column", gap: 8 },
+  label: { fontSize: 11, fontWeight: 600, color: "#666", letterSpacing: "0.05em", textTransform: "uppercase" },
+  input: { padding: "12px 14px", border: "1px solid #1C1C1C", borderRadius: 9, fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box", width: "100%", background: "#080808", color: "#EEEEEE", transition: "border-color 0.15s" },
 
-  // Service cards — inset left orange accent on selection
-  serviceGrid: { display: "flex", flexDirection: "column", gap: 6 },
-  serviceCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 18px", border: "1px solid #161616", borderRadius: 8, background: "#080808", cursor: "pointer", fontFamily: "inherit", textAlign: "left", boxShadow: "inset 4px 0 0 transparent" },
-  serviceCardActive: { border: "1px solid #252525", background: "#0C0C0C", boxShadow: "inset 4px 0 0 #F97316" },
+  // Service cards
+  serviceGrid: { display: "flex", flexDirection: "column", gap: 8 },
+  serviceCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 18px", border: "1px solid #1C1C1C", borderRadius: 10, background: "#090909", cursor: "pointer", fontFamily: "inherit", textAlign: "left", transition: "border-color 0.15s" },
+  serviceCardActive: { border: "1px solid rgba(249,115,22,0.45)", background: "#0E0E0E" },
   serviceName: { fontSize: 14, fontWeight: 600, color: "#EEEEEE" },
-  serviceMeta: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 },
-  servicePrice: { fontSize: 20, fontWeight: 800, color: "#F97316", letterSpacing: "-0.02em" },
-  serviceDuration: { fontSize: 10, color: "#888888", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" },
+  serviceMeta: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 },
+  servicePrice: { fontSize: 22, fontWeight: 800, color: "#F97316", letterSpacing: "-0.02em" },
+  serviceDuration: { fontSize: 10, color: "#666", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" },
 
-  // Vehicle toggle — segmented control
-  vehicleToggle: { display: "flex", background: "#080808", border: "1px solid #1A1A1A", borderRadius: 9, padding: 3 },
-  vehicleBtn: { flex: 1, padding: "10px 16px", border: "none", borderRadius: 7, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#777", fontFamily: "inherit" },
-  vehicleBtnActive: { background: "#171717", color: "#EEEEEE" },
+  // Vehicle toggle
+  vehicleToggle: { display: "flex", background: "#080808", border: "1px solid #1C1C1C", borderRadius: 10, padding: 3 },
+  vehicleBtn: { flex: 1, padding: "10px 16px", border: "none", borderRadius: 8, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#555", fontFamily: "inherit", transition: "all 0.15s" },
+  vehicleBtnActive: { background: "#181818", color: "#EEEEEE" },
 
-  // Time slots — inset left orange accent on selection
-  slotGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: 6 },
-  slotCard: { padding: "14px 16px", border: "1px solid #161616", borderRadius: 8, background: "#080808", cursor: "pointer", textAlign: "left", fontFamily: "inherit", display: "flex", flexDirection: "column", gap: 4, boxShadow: "inset 4px 0 0 transparent" },
-  slotCardActive: { border: "1px solid #252525", background: "#0C0C0C", boxShadow: "inset 4px 0 0 #F97316" },
+  // Time slots
+  slotGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: 8 },
+  slotCard: { padding: "14px 16px", border: "1px solid #1C1C1C", borderRadius: 10, background: "#090909", cursor: "pointer", textAlign: "left", fontFamily: "inherit", display: "flex", flexDirection: "column", gap: 4, transition: "border-color 0.15s" },
+  slotCardActive: { border: "1px solid rgba(249,115,22,0.45)", background: "#0E0E0E" },
   slotDate: { fontSize: 13, fontWeight: 600, color: "#EEEEEE" },
-  slotTime: { fontSize: 11, color: "#F97316", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" },
+  slotTime: { fontSize: 11, color: "#F97316", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" },
 
   // Confirm card
-  confirmCard: { border: "1px solid #161616", borderRadius: 8, overflow: "hidden" },
-  confirmRow: { display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #0F0F0F" },
-  confirmLabel: { fontSize: 10, color: "#888888", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase" },
+  confirmCard: { border: "1px solid #1C1C1C", borderRadius: 10, overflow: "hidden" },
+  confirmRow: { display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #111" },
+  confirmLabel: { fontSize: 10, color: "#666", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" },
   confirmValue: { fontSize: 13, color: "#EEEEEE", fontWeight: 600, textAlign: "right", maxWidth: "60%" },
 
   // Buttons
   btnRow: { display: "flex", gap: 10, justifyContent: "flex-end" },
-  btnPrimary: { padding: "14px 28px", background: "#F97316", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase" },
-  btnSecondary: { padding: "14px 22px", background: "transparent", color: "#888888", border: "1px solid #1A1A1A", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.02em" },
-  btnDisabled: { opacity: 0.22, cursor: "not-allowed" },
-  errorBox: { background: "#180000", border: "1px solid #380000", color: "#FC8181", padding: "12px 14px", borderRadius: 8, fontSize: 13 },
+  btnPrimary: { padding: "13px 28px", background: "#F97316", color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "background 0.15s" },
+  btnSecondary: { padding: "13px 22px", background: "transparent", color: "#666", border: "1px solid #1C1C1C", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" },
+  btnDisabled: { opacity: 0.2, cursor: "not-allowed" },
+  errorBox: { background: "#180000", border: "1px solid #350000", color: "#FC8181", padding: "12px 14px", borderRadius: 8, fontSize: 13 },
 
   // Success page
   successView: { display: "flex", flexDirection: "column", alignItems: "center", padding: "60px 24px 40px", textAlign: "center" },
   successIconLarge: { width: 72, height: 72, borderRadius: "50%", background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, marginBottom: 28, color: "#fff", fontWeight: 700 },
   successIcon: { width: 56, height: 56, borderRadius: "50%", background: "#F97316", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, margin: "0 auto 20px", color: "#fff", fontWeight: 700 },
-  successTitle: { fontSize: 32, fontWeight: 800, color: "#EEEEEE", margin: "0 0 16px", letterSpacing: "-0.03em" },
-  successBody: { fontSize: 15, color: "#777", margin: "0 0 8px", lineHeight: 1.7, maxWidth: 420 },
-  successSub: { fontSize: 13, color: "#888888", margin: "0 0 36px" },
+  successTitle: { fontSize: 32, fontWeight: 800, color: "#F0F0F0", margin: "0 0 16px", letterSpacing: "-0.03em" },
+  successBody: { fontSize: 15, color: "#666", margin: "0 0 8px", lineHeight: 1.7, maxWidth: 420 },
+  successSub: { fontSize: 13, color: "#555", margin: "0 0 36px" },
   successActions: { display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 32 },
-  successNav: { fontSize: 12, color: "#666666", maxWidth: 340 },
-  emptyMsg: { textAlign: "center", color: "#666666", padding: "40px 0", fontSize: 14 },
+  successNav: { fontSize: 12, color: "#444", maxWidth: 340 },
+  emptyMsg: { textAlign: "center", color: "#555", padding: "40px 0", fontSize: 14 },
 
   // Gallery & section headers
-  galleryHero: { textAlign: "center", marginBottom: 32, paddingTop: 36 },
-  galleryHeroTitle: { fontSize: 34, fontWeight: 800, color: "#EEEEEE", margin: "0 0 8px", letterSpacing: "-0.03em" },
-  galleryHeroSub: { fontSize: 10, color: "#888888", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", margin: 0 },
-  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(195px, 1fr))", gap: 8 },
-  photoLink: { display: "block", borderRadius: 8, overflow: "hidden", height: 160, border: "1px solid #141414" },
+  galleryHero: { textAlign: "center", marginBottom: 32, paddingTop: 40 },
+  galleryHeroTitle: { fontSize: 36, fontWeight: 800, color: "#F0F0F0", margin: "0 0 8px", letterSpacing: "-0.035em" },
+  galleryHeroSub: { fontSize: 12, color: "#555", fontWeight: 500, margin: 0 },
+  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 8 },
+  photoLink: { display: "block", borderRadius: 10, overflow: "hidden", height: 180, border: "1px solid #151515" },
   photoImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
 
-  // Floating reviews — left orange border accent
-  floatingWrap: { position: "fixed", right: 24, top: "50%", marginTop: -80, zIndex: 5, width: 224 },
-  floatingCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #F97316", borderRadius: 10, padding: "14px 16px" },
-  floatingStars: { color: "#F97316", fontSize: 13, letterSpacing: 2, marginBottom: 8 },
-  floatingComment: { fontSize: 12, color: "#909090", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
-  floatingName: { fontSize: 10, color: "#777", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" },
+  // Floating reviews
+  floatingWrap: { position: "fixed", right: 20, top: "50%", marginTop: -90, zIndex: 5, width: 220 },
+  floatingCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 12, padding: "14px 16px" },
+  floatingStars: { color: "#F97316", fontSize: 12, letterSpacing: 2, marginBottom: 8 },
+  floatingComment: { fontSize: 12, color: "#777", lineHeight: 1.5, margin: "0 0 8px", fontStyle: "italic" },
+  floatingName: { fontSize: 10, color: "#555", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" },
 
   // Reviews
-  reviewStats: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 12, padding: "28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
+  reviewStats: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 14, padding: "28px", display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap" },
   reviewAvgBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 80 },
-  reviewAvgNum: { fontSize: 36, fontWeight: 800, color: "#EEEEEE", lineHeight: 1, letterSpacing: "-0.04em" },
+  reviewAvgNum: { fontSize: 40, fontWeight: 800, color: "#F0F0F0", lineHeight: 1, letterSpacing: "-0.04em" },
   reviewAvgStars: { display: "flex", gap: 2 },
-  reviewCount: { fontSize: 10, color: "#888888", fontWeight: 700, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.1em" },
+  reviewCount: { fontSize: 10, color: "#555", fontWeight: 600, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.08em" },
   reviewBars: { flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 200 },
   reviewBarRow: { display: "flex", alignItems: "center", gap: 10 },
-  reviewBarLabel: { fontSize: 11, color: "#888888", width: 24, textAlign: "right", flexShrink: 0, fontWeight: 600 },
+  reviewBarLabel: { fontSize: 11, color: "#666", width: 24, textAlign: "right", flexShrink: 0, fontWeight: 600 },
   reviewBarTrack: { flex: 1, height: 4, background: "#141414", borderRadius: 99, overflow: "hidden" },
   reviewBarFill: { height: "100%", background: "#F97316", borderRadius: 99, transition: "width 0.6s ease" },
-  reviewBarCount: { fontSize: 11, color: "#666666", width: 20, flexShrink: 0 },
+  reviewBarCount: { fontSize: 11, color: "#555", width: 20, flexShrink: 0 },
   starPicker: { display: "flex", gap: 0, marginTop: 4 },
   starPickBtn: { background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 },
   anonRow: { display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginTop: 6 },
-  reviewCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 },
+  reviewCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 12, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 },
   reviewCardTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" },
   reviewerName: { fontSize: 14, fontWeight: 700, color: "#EEEEEE", marginBottom: 4 },
-  reviewDate: { fontSize: 10, color: "#666666", flexShrink: 0, fontWeight: 600, letterSpacing: "0.04em" },
-  reviewComment: { fontSize: 14, color: "#909090", lineHeight: 1.6, margin: 0 },
+  reviewDate: { fontSize: 10, color: "#555", flexShrink: 0, fontWeight: 600, letterSpacing: "0.04em" },
+  reviewComment: { fontSize: 14, color: "#777", lineHeight: 1.6, margin: 0 },
 
   // Admin
   adminTopBar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   adminTitle: { fontSize: 22, fontWeight: 700, color: "#EEEEEE", margin: 0, letterSpacing: "-0.02em" },
-  refreshBtn: { padding: "7px 14px", background: "transparent", border: "1px solid #1A1A1A", borderRadius: 7, cursor: "pointer", fontSize: 11, color: "#888", fontFamily: "inherit", letterSpacing: "0.04em" },
-  addServiceBtn: { padding: "7px 14px", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: 7, cursor: "pointer", fontSize: 11, color: "#F97316", fontFamily: "inherit", fontWeight: 700, letterSpacing: "0.04em" },
+  refreshBtn: { padding: "7px 14px", background: "transparent", border: "1px solid #1C1C1C", borderRadius: 8, cursor: "pointer", fontSize: 11, color: "#666", fontFamily: "inherit" },
+  addServiceBtn: { padding: "7px 14px", background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 8, cursor: "pointer", fontSize: 11, color: "#F97316", fontFamily: "inherit", fontWeight: 700 },
   statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 14 },
-  revenueCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderLeft: "3px solid #86EFAC", borderRadius: 10, padding: "16px 22px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between" },
-  revenueLabel: { fontSize: 9, color: "#888888", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 4 },
+  revenueCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderLeft: "3px solid #86EFAC", borderRadius: 12, padding: "16px 22px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between" },
+  revenueLabel: { fontSize: 9, color: "#666", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em", marginBottom: 4 },
   revenueAmount: { fontSize: 34, fontWeight: 800, color: "#86EFAC", letterSpacing: "-0.03em" },
-  revenueSub: { fontSize: 11, color: "#666666" },
-  statCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "18px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
+  revenueSub: { fontSize: 11, color: "#555" },
+  statCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 10, padding: "18px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
   statNum: { fontSize: 30, fontWeight: 800, letterSpacing: "-0.03em" },
-  statLabel: { fontSize: 9, color: "#888888", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em" },
+  statLabel: { fontSize: 9, color: "#666", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.1em" },
   filterRow: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" },
-  filterBtn: { padding: "5px 14px", borderRadius: 20, border: "1px solid #1A1A1A", background: "transparent", cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#888888", textTransform: "capitalize", fontFamily: "inherit", letterSpacing: "0.04em" },
-  filterBtnActive: { background: "#161616", color: "#EEEEEE", borderColor: "#252525" },
+  filterBtn: { padding: "5px 14px", borderRadius: 20, border: "1px solid #1C1C1C", background: "transparent", cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#666", textTransform: "capitalize", fontFamily: "inherit" },
+  filterBtnActive: { background: "#181818", color: "#EEEEEE", borderColor: "#282828" },
   bookingList: { display: "flex", flexDirection: "column", gap: 10 },
-  bookingCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: "16px 20px" },
+  bookingCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 12, padding: "16px 20px" },
   bookingTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
   bookingName: { fontSize: 15, fontWeight: 700, color: "#EEEEEE", marginBottom: 2 },
-  bookingDate: { fontSize: 12, color: "#888888" },
-  badge: { padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" },
-  bookingBody: { display: "flex", flexDirection: "column", gap: 4, marginBottom: 14, paddingBottom: 14, borderBottom: "1px solid #111" },
-  bookingDetail: { fontSize: 13, color: "#909090" },
+  bookingDate: { fontSize: 12, color: "#666" },
+  badge: { padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" },
+  bookingBody: { display: "flex", flexDirection: "column", gap: 4, marginBottom: 14, paddingBottom: 14, borderBottom: "1px solid #131313" },
+  bookingDetail: { fontSize: 13, color: "#777" },
   bookingActions: { display: "flex", alignItems: "center", gap: 10 },
-  actionLabel: { fontSize: 9, color: "#666666", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" },
-  statusSelect: { padding: "6px 10px", border: "1px solid #1A1A1A", borderRadius: 6, fontSize: 13, fontFamily: "inherit", cursor: "pointer", background: "#080808", color: "#EEEEEE" },
+  actionLabel: { fontSize: 9, color: "#555", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" },
+  statusSelect: { padding: "6px 10px", border: "1px solid #1C1C1C", borderRadius: 7, fontSize: 13, fontFamily: "inherit", cursor: "pointer", background: "#080808", color: "#EEEEEE" },
   bookingTopActions: { display: "flex", alignItems: "center", gap: 8 },
-  trashBtn: { display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 10, border: "1px solid #2A2A2A", background: "#0B0B0B", color: "#F87171", cursor: "pointer", transition: "background 0.2s, transform 0.2s" },
-  adminTabRow: { display: "flex", marginBottom: 24, borderBottom: "1px solid #141414" },
-  adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#888888", fontFamily: "inherit", letterSpacing: "0.08em", textTransform: "uppercase" },
+  trashBtn: { display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 8, border: "1px solid #222", background: "#0A0A0A", color: "#F87171", cursor: "pointer" },
+  adminTabRow: { display: "flex", marginBottom: 24, borderBottom: "1px solid #151515" },
+  adminTab: { padding: "10px 20px", background: "none", border: "none", borderBottom: "2px solid transparent", marginBottom: -1, cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#666", fontFamily: "inherit", letterSpacing: "0.06em", textTransform: "uppercase" },
   adminTabActive: { color: "#EEEEEE", borderBottomColor: "#F97316" },
-  uploadCard: { background: "#0C0C0C", border: "1px solid #1A1A1A", borderRadius: 10, padding: 20, display: "flex", flexDirection: "column", gap: 14 },
-  uploadLabel: { fontSize: 10, fontWeight: 700, color: "#888888", margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" },
-  uploadZone: { display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 8, border: "1px dashed #1E1E1E", overflow: "hidden", minHeight: 160 },
+  uploadCard: { background: "#0D0D0D", border: "1px solid #1C1C1C", borderRadius: 12, padding: 20, display: "flex", flexDirection: "column", gap: 14 },
+  uploadLabel: { fontSize: 10, fontWeight: 700, color: "#666", margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" },
+  uploadZone: { display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 8, border: "1px dashed #1C1C1C", overflow: "hidden", minHeight: 160 },
   uploadEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: 32 },
   uploadIcon: { fontSize: 24, color: "#F97316" },
   uploadPreview: { width: "100%", maxHeight: 260, objectFit: "contain", display: "block" },
