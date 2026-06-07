@@ -41,6 +41,9 @@ export function cleanNotes(notes) {
   return notes.replace(/^\[vehicle:(sedan|suv)\]\n?/, "").trim() || null;
 }
 
+const BLACKOUT_START = "2026-06-19";
+const BLACKOUT_END   = "2026-07-14";
+
 export function getAvailableSlots() {
   const slots = [];
   const today = new Date();
@@ -50,15 +53,16 @@ export function getAvailableSlots() {
     date.setDate(today.getDate() + i);
     const dow = date.getDay();
     const match = WEEKLY_SLOTS.find((s) => s.day === dow);
-    if (match) {
-      match.times.forEach((time) => {
-        slots.push({
-          date: date.toISOString().split("T")[0],
-          displayDate: date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" }),
-          time,
-        });
+    if (!match) continue;
+    const dateStr = date.toISOString().split("T")[0];
+    if (dateStr >= BLACKOUT_START && dateStr <= BLACKOUT_END) continue;
+    match.times.forEach((time) => {
+      slots.push({
+        date: dateStr,
+        displayDate: date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" }),
+        time,
       });
-    }
+    });
   }
   return slots;
 }
