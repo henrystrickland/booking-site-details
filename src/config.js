@@ -44,6 +44,11 @@ export function cleanNotes(notes) {
 const BLACKOUT_START = "2026-06-19";
 const BLACKOUT_END   = "2026-07-14";
 
+const DATE_SPECIFIC_SLOTS = [
+  { date: "2026-06-17", times: ["8:15 AM", "12:30 PM"] },
+  { date: "2026-06-18", times: ["8:15 AM", "12:00 PM"] },
+];
+
 export function getAvailableSlots() {
   const slots = [];
   const today = new Date();
@@ -52,17 +57,19 @@ export function getAvailableSlots() {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     const dow = date.getDay();
-    const match = WEEKLY_SLOTS.find((s) => s.day === dow);
-    if (!match) continue;
     const dateStr = date.toISOString().split("T")[0];
     if (dateStr >= BLACKOUT_START && dateStr <= BLACKOUT_END) continue;
-    match.times.forEach((time) => {
-      slots.push({
-        date: dateStr,
-        displayDate: date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" }),
-        time,
-      });
-    });
+    const displayDate = date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+
+    const specific = DATE_SPECIFIC_SLOTS.find((s) => s.date === dateStr);
+    if (specific) {
+      specific.times.forEach((time) => slots.push({ date: dateStr, displayDate, time }));
+      continue;
+    }
+
+    const match = WEEKLY_SLOTS.find((s) => s.day === dow);
+    if (!match) continue;
+    match.times.forEach((time) => slots.push({ date: dateStr, displayDate, time }));
   }
   return slots;
 }
