@@ -233,12 +233,141 @@ function AdminAddBooking({ onDone }) {
   );
 }
 
+function AdminEditBooking({ booking, onDone }) {
+  const vehicleMatch = (booking.notes || "").match(/\[vehicle:(sedan|suv)\]/);
+  const [form, setForm] = useState({
+    client_name: booking.client_name || "",
+    client_phone: booking.client_phone || "",
+    client_email: booking.client_email || "",
+    vehicle_type: vehicleMatch ? vehicleMatch[1] : "sedan",
+    service_type: booking.service_type || "",
+    booking_date: booking.booking_date || "",
+    booking_time: booking.booking_time || "",
+    notes: cleanNotes(booking.notes) || "",
+    status: booking.status || "pending",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const svc = SERVICES.find(sv => sv.name === form.service_type);
+  const price = svc ? svc.prices[form.vehicle_type] : null;
+
+  const submit = async () => {
+    if (!form.client_name || !form.service_type || !form.booking_date || !form.booking_time) {
+      setError("Name, service, date, and time are required.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    const { error: err } = await supabase.from("bookings").update({
+      client_name: form.client_name,
+      client_email: form.client_email || null,
+      client_phone: form.client_phone || null,
+      service_type: form.service_type,
+      booking_date: form.booking_date,
+      booking_time: form.booking_time,
+      notes: `[vehicle:${form.vehicle_type}]${form.notes ? "\n" + form.notes : ""}`,
+      status: form.status,
+    }).eq("id", booking.id);
+    setLoading(false);
+    if (err) { setError("Something went wrong. Please try again."); return; }
+    onDone();
+  };
+
+  return (
+    <div style={s.card}>
+      <div style={s.formSection}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={s.sectionTitle}>Edit Booking</h2>
+          <button style={s.btnSecondary} onClick={onDone}>Cancel</button>
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Client name</label>
+          <input style={s.input} value={form.client_name} onChange={e => set("client_name", e.target.value)} placeholder="Jane Smith" />
+        </div>
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Phone <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
+          <input style={s.input} type="tel" value={form.client_phone} onChange={e => set("client_phone", e.target.value)} placeholder="(555) 000-0000" />
+        </div>
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Email <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
+          <input style={s.input} type="email" value={form.client_email} onChange={e => set("client_email", e.target.value)} placeholder="you@example.com" />
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Vehicle type</label>
+          <div style={s.vehicleToggle}>
+            {["sedan", "suv"].map(v => (
+              <button key={v} style={{ ...s.vehicleBtn, ...(form.vehicle_type === v ? s.vehicleBtnActive : {}) }} onClick={() => set("vehicle_type", v)}>
+                {v === "sedan" ? "Sedan" : "SUV / Truck"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Service</label>
+          <div style={s.serviceGrid}>
+            {SERVICES.map(sv => (
+              <button key={sv.id} className="svc-card" style={{ ...s.serviceCard, ...(form.service_type === sv.name ? s.serviceCardActive : {}) }} onClick={() => set("service_type", sv.name)}>
+                <span style={s.serviceName}>{sv.name}</span>
+                <div style={s.serviceMeta}>
+                  <span style={s.servicePrice}>${sv.prices[form.vehicle_type]}</span>
+                  <span style={s.serviceDuration}>{sv.duration}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+          {price !== null && <div style={{ fontSize: 13, color: "#86EFAC", fontWeight: 700, marginTop: 6 }}>Price: ${price}</div>}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Date</label>
+            <input style={s.input} type="date" value={form.booking_date} onChange={e => set("booking_date", e.target.value)} />
+          </div>
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Time</label>
+            <input style={s.input} value={form.booking_time} onChange={e => set("booking_time", e.target.value)} placeholder="e.g. 10:00 AM" />
+          </div>
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Status</label>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {["pending", "confirmed", "completed", "cancelled"].map(st => (
+              <button key={st} style={{ ...s.filterBtn, ...(form.status === st ? s.filterBtnActive : {}) }} onClick={() => set("status", st)}>{st}</button>
+            ))}
+          </div>
+        </div>
+
+        <div style={s.fieldGroup}>
+          <label style={s.label}>Notes <span style={{ color: "#888888", fontWeight: 400 }}>(optional)</span></label>
+          <textarea style={{ ...s.input, minHeight: 80, resize: "vertical" }} value={form.notes} onChange={e => set("notes", e.target.value)} placeholder="Car make/model, special requests..." />
+        </div>
+
+        {error && <div style={s.errorBox}>{error}</div>}
+        <button
+          style={{ ...s.btnPrimary, ...(!form.client_name || !form.service_type || !form.booking_date || !form.booking_time ? s.btnDisabled : {}) }}
+          disabled={loading || !form.client_name || !form.service_type || !form.booking_date || !form.booking_time}
+          onClick={submit}
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AdminView() {
   const [tab, setTab] = useState("bookings");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [adding, setAdding] = useState(false);
+  const [editingBooking, setEditingBooking] = useState(null);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -285,7 +414,7 @@ function AdminView() {
       <div style={s.adminTopBar}>
         <h1 style={s.adminTitle}>Admin</h1>
         <div style={{ display: "flex", gap: 8 }}>
-          {tab === "bookings" && !adding && (
+          {tab === "bookings" && !adding && !editingBooking && (
             <>
               <button style={s.addServiceBtn} onClick={() => setAdding(true)}>+ Add Service</button>
               <button style={s.refreshBtn} onClick={fetchBookings}>↻ Refresh</button>
@@ -296,7 +425,7 @@ function AdminView() {
 
       <div style={s.adminTabRow}>
         {["bookings", "archived", "gallery"].map(t => (
-          <button key={t} style={{ ...s.adminTab, ...(tab === t ? s.adminTabActive : {}) }} onClick={() => { setTab(t); setAdding(false); }}>
+          <button key={t} style={{ ...s.adminTab, ...(tab === t ? s.adminTabActive : {}) }} onClick={() => { setTab(t); setAdding(false); setEditingBooking(null); }}>
             {t === "bookings" ? "Bookings" : t === "archived" ? "Archived" : "Gallery Photos"}
           </button>
         ))}
@@ -308,7 +437,11 @@ function AdminView() {
         <AdminAddBooking onDone={() => { setAdding(false); fetchBookings(); }} />
       )}
 
-      {tab === "bookings" && !adding && (
+      {tab === "bookings" && editingBooking && (
+        <AdminEditBooking booking={editingBooking} onDone={() => { setEditingBooking(null); fetchBookings(); }} />
+      )}
+
+      {tab === "bookings" && !adding && !editingBooking && (
         <>
           <div style={s.statsRow}>
             {[["total", bookings.length, "#F97316"], ["pending", counts.pending || 0, "#FB923C"], ["confirmed", counts.confirmed || 0, "#60A5FA"], ["completed", counts.completed || 0, "#86EFAC"]].map(([label, count, color]) => (
@@ -354,6 +487,12 @@ function AdminView() {
                       </div>
                       <div style={s.bookingTopActions}>
                         <span style={{ ...s.badge, background: st.bg, color: st.color }}>{st.label}</span>
+                        <button style={s.trashBtn} onClick={() => setEditingBooking(b)} title="Edit booking">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                        </button>
                         <button style={s.trashBtn} onClick={() => archiveBooking(b.id)} title="Archive booking">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M5 4h14v4H5z" />

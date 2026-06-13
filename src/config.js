@@ -45,7 +45,8 @@ const BLACKOUT_START = "2026-06-19";
 const BLACKOUT_END   = "2026-07-14";
 
 const DATE_SPECIFIC_SLOTS = [
-  { date: "2026-06-17", times: ["8:15 AM", "12:30 PM"] },
+  { date: "2026-06-16", times: ["12:30 PM", "4:00 PM"] },
+  { date: "2026-06-17", times: ["8:15 AM", "12:30 PM", "4:00 PM"] },
   { date: "2026-06-18", times: ["8:15 AM", "12:00 PM"] },
 ];
 
