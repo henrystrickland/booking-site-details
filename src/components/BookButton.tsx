@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { bookingHref, cal } from "../content/site";
+import { useBooking } from "./BookingModal";
 
 type Variant = "ink" | "gold" | "ghost";
 type Size = "default" | "slim";
@@ -32,9 +33,10 @@ const SIZES: Record<Size, string> = {
 };
 
 /**
- * The one place a Cal.com link is rendered. Builds its href from site.ts, so
- * flipping `cal.enabled` re-points every button at once. Opens in a new tab
- * only once live (the #book placeholder stays in-page).
+ * The one place a Cal.com booking is triggered. When `cal.enabled` is true a
+ * click opens the on-page booking pop-up (the site stays visible behind it);
+ * the href stays the real Cal URL as a no-JS / new-tab fallback. When disabled
+ * it's an inert in-page #book anchor.
  */
 export function BookButton({
   slug,
@@ -43,11 +45,8 @@ export function BookButton({
   size = "default",
   className = "",
 }: BookButtonProps) {
+  const { open } = useBooking();
   const href = bookingHref(slug);
-  // When booking is live, open the Cal.com popup (via data-cal-link) instead of
-  // a new tab. The href stays the real Cal URL as a graceful fallback if the
-  // embed script hasn't loaded yet; when disabled it's the inert #book anchor.
-  const calLink = cal.enabled ? `${cal.username}/${slug}` : undefined;
 
   const base =
     "group inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-tight transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
@@ -55,9 +54,13 @@ export function BookButton({
   return (
     <motion.a
       href={href}
-      data-cal-link={calLink}
-      data-cal-namespace={calLink ? "booking" : undefined}
-      rel={calLink ? "noopener" : undefined}
+      rel={cal.enabled ? "noopener" : undefined}
+      onClick={(e) => {
+        if (cal.enabled) {
+          e.preventDefault();
+          open(slug);
+        }
+      }}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.18, ease: "easeOut" }}

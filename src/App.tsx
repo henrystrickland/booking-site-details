@@ -8,15 +8,14 @@ import { FinalCTA } from "./components/FinalCTA";
 import { Footer } from "./components/Footer";
 import { ScrollGate } from "./components/ScrollGate";
 import { BackToTop } from "./components/BackToTop";
+import { BookingProvider } from "./components/BookingModal";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
-import { useCalEmbed } from "./hooks/useCalEmbed";
 
 export default function App() {
   useSmoothScroll();
-  useCalEmbed();
 
   return (
-    <>
+    <BookingProvider>
       <Navbar />
       <Hero />
       <TrustStrip />
@@ -29,6 +28,6 @@ export default function App() {
       <ScrollGate />
       <Footer />
       <BackToTop />
-    </>
+    </BookingProvider>
   );
 }
