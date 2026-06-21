@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { bookingHref, cal } from "../content/site";
 
 type Variant = "ink" | "gold" | "ghost";
+type Size = "default" | "slim";
 
 interface BookButtonProps {
   slug: string;
@@ -9,7 +10,10 @@ interface BookButtonProps {
   /** Colour treatment. Pick one — don't override colours via className
    *  (conflicting Tailwind utilities resolve unpredictably). */
   variant?: Variant;
-  /** Layout-only extras: sizing, width, etc. No colour utilities here. */
+  /** Pill height/padding. Set this rather than passing px-/py- in className —
+   *  base padding utilities win unpredictably over className overrides. */
+  size?: Size;
+  /** Layout-only extras: width, margins. No padding or colour utilities here. */
   className?: string;
 }
 
@@ -22,6 +26,11 @@ const VARIANTS: Record<Variant, string> = {
   ghost: "border border-line bg-paper/60 text-ink hover:border-ink",
 };
 
+const SIZES: Record<Size, string> = {
+  default: "px-7 py-3.5 text-[15px]",
+  slim: "px-6 py-2 text-[15px]",
+};
+
 /**
  * The one place a Cal.com link is rendered. Builds its href from site.ts, so
  * flipping `cal.enabled` re-points every button at once. Opens in a new tab
@@ -31,13 +40,14 @@ export function BookButton({
   slug,
   children,
   variant = "ink",
+  size = "default",
   className = "",
 }: BookButtonProps) {
   const href = bookingHref(slug);
   const external = cal.enabled;
 
   const base =
-    "group inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold tracking-tight transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+    "group inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-tight transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
   return (
     <motion.a
@@ -47,7 +57,7 @@ export function BookButton({
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className={`${base} ${VARIANTS[variant]} ${className}`}
+      className={`${base} ${SIZES[size]} ${VARIANTS[variant]} ${className}`}
     >
       {children}
       <svg

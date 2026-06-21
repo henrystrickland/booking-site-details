@@ -40,7 +40,7 @@ export const brand = {
   logoSrc: "/img/logo.png",
   phone: "(703) 376-7536",
   phoneHref: "tel:7033767536",
-  email: "hello@chautodetails.com", // PLACEHOLDER — replace with real email
+  email: "chautodetails@gmail.com",
   instagram: "https://instagram.com/ch.autodetails",
   facebook:
     "https://www.facebook.com/people/CH-Elite-Auto-Detailing/61572140056742/",
@@ -217,6 +217,45 @@ export const addOns: AddOn[] = [
 /** Caption under the add-ons heading. */
 export const addOnsNote =
   "Add any of these to your detail when you book — just let us know.";
+
+/* ── Discounts ──────────────────────────────────────────────────────────────
+   Savings stacked under the add-ons. Amounts are dollars off the final price. */
+export interface Discount {
+  id: string;
+  name: string;
+  description: string;
+  /** Dollars off, shown as "−$XX". */
+  amount: number;
+  icon: "shield" | "repeat" | "cars";
+}
+
+export const discounts: Discount[] = [
+  {
+    id: "military",
+    name: "Military Discount",
+    description: "Thank you for your service — active duty and veterans save.",
+    amount: 10,
+    icon: "shield",
+  },
+  {
+    id: "returning",
+    name: "Returning Customer",
+    description: "Come back for another detail and we take care of you.",
+    amount: 15,
+    icon: "repeat",
+  },
+  {
+    id: "multi-car",
+    name: "2 or More Cars",
+    description: "Booking the whole driveway? Save on every additional vehicle.",
+    amount: 10,
+    icon: "cars",
+  },
+];
+
+/** Caption under the discounts heading. */
+export const discountsNote =
+  "Mention any that apply when you book — discounts come off your final quote.";
 
 /* ── How it works ───────────────────────────────────────────────────────── */
 export const steps = [

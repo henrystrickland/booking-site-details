@@ -81,10 +81,18 @@ export function Hero() {
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-24 pt-24 text-center">
         {/* Glow lives on a static wrapper so the entrance blur animation on the
             image never overrides the drop-shadow. */}
-        <div className="logo-glow w-[62vw] max-w-[400px]">
+        <div className="logo-glow w-[56vw] max-w-[360px]">
           <motion.img
             src={hero.logoSrc}
             alt="C&H Elite Auto Detailing"
+            // Intrinsic size reserves the aspect ratio (no layout shift) and the
+            // 1565px source stays far above the rendered size, so it renders
+            // pin-sharp on any display. It's the hero focal point → fetch first.
+            width={1565}
+            height={1017}
+            fetchPriority="high"
+            decoding="async"
+            draggable={false}
             className="w-full"
             initial={reduce ? false : { opacity: 0, scale: 0.94, filter: "blur(10px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}

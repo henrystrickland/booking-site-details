@@ -34,10 +34,10 @@ export function TrustStrip() {
                 </svg>
               </span>
               <span>
-                <span className="block text-[15px] font-semibold tracking-tight text-ink">
+                <span className="block text-base font-semibold tracking-tight text-ink">
                   {point.title}
                 </span>
-                <span className="block text-sm text-ink-faint">{point.note}</span>
+                <span className="block text-[15px] text-ink-faint">{point.note}</span>
               </span>
             </div>
           </Reveal>

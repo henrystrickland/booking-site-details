@@ -6,8 +6,12 @@ import { AddOns } from "./components/AddOns";
 import { HowItWorks } from "./components/HowItWorks";
 import { FinalCTA } from "./components/FinalCTA";
 import { Footer } from "./components/Footer";
+import { ScrollGate } from "./components/ScrollGate";
+import { useSmoothScroll } from "./hooks/useSmoothScroll";
 
 export default function App() {
+  useSmoothScroll();
+
   return (
     <>
       <Navbar />
@@ -19,6 +23,7 @@ export default function App() {
         <HowItWorks />
         <FinalCTA />
       </main>
+      <ScrollGate />
       <Footer />
     </>
   );

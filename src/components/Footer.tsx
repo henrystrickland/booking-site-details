@@ -1,6 +1,7 @@
 import { brand, primaryBookingSlug } from "../content/site";
 import { BookButton } from "./BookButton";
 import { Reveal } from "./Reveal";
+import { SocialLinks } from "./SocialLinks";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -9,13 +10,15 @@ export function Footer() {
     <footer className="grain relative overflow-hidden bg-ink px-6 py-12 text-canvas sm:px-10">
       <div className="mx-auto max-w-6xl">
         <Reveal>
-          <div className="grid gap-8 sm:grid-cols-[1.7fr_1fr_1fr_auto] sm:items-start sm:gap-10">
+          <div className="grid gap-8 sm:grid-cols-[1.5fr_1fr_1.3fr_auto] sm:items-start sm:gap-10">
             {/* Brand */}
             <div>
-              <span className="font-display text-lg tracking-tight">
-                {brand.name}
-              </span>
-              <p className="mt-2 max-w-xs text-sm leading-relaxed text-canvas/60">
+              <img
+                src="/img/logo.png"
+                alt={brand.name}
+                className="h-12 w-auto brightness-0 invert"
+              />
+              <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-canvas/60">
                 Premium mobile detailing across {brand.serviceArea}. We come to you.
               </p>
             </div>
@@ -25,7 +28,7 @@ export function Footer() {
               <p className="mb-3 font-serif text-xs uppercase tracking-[0.25em] text-accent">
                 Contact
               </p>
-              <ul className="space-y-2 text-sm text-canvas/65">
+              <ul className="space-y-2 text-[15px] text-canvas/65">
                 <li>
                   <a className="transition-colors hover:text-accent" href={brand.phoneHref}>
                     {brand.phone}
@@ -44,28 +47,7 @@ export function Footer() {
               <p className="mb-3 font-serif text-xs uppercase tracking-[0.25em] text-accent">
                 Follow
               </p>
-              <ul className="space-y-2 text-sm text-canvas/65">
-                <li>
-                  <a
-                    className="transition-colors hover:text-accent"
-                    href={brand.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Instagram
-                  </a>
-                </li>
-                <li>
-                  <a
-                    className="transition-colors hover:text-accent"
-                    href={brand.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Facebook
-                  </a>
-                </li>
-              </ul>
+              <SocialLinks tone="light" />
             </div>
 
             {/* CTA */}
