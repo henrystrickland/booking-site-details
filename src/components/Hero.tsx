@@ -106,7 +106,7 @@ export function Hero() {
           >
             {hero.quoteCta}
           </a>
-          <BookButton slug={primaryBookingSlug} variant="gold">
+          <BookButton slug={primaryBookingSlug} variant="gold" chooser>
             {hero.bookCta}
           </BookButton>
         </motion.div>

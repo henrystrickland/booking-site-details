@@ -57,7 +57,7 @@ export function Navbar() {
         scrolled ? "glass-nav" : "border-b border-transparent bg-transparent"
       }`}
     >
-      <nav className="relative mx-auto flex max-w-6xl items-center justify-center px-6 py-3.5 sm:px-10">
+      <nav className="relative mx-auto flex min-h-[64px] max-w-6xl items-center justify-center px-6 py-3.5 sm:px-10 md:min-h-0">
         {/* Desktop links + CTA, centered as one cluster */}
         <div className="hidden items-center gap-9 md:flex">
           {nav.map((item) => (
@@ -73,10 +73,33 @@ export function Navbar() {
             slug={primaryBookingSlug}
             variant={scrolled ? "ink" : "gold"}
             size="slim"
+            chooser
           >
             Book
           </BookButton>
         </div>
+
+        {/* Mobile logo — gives the bar real height and branding (the bar would
+            otherwise collapse to just padding around the floating hamburger). */}
+        <a
+          href="#top"
+          aria-label="C&H Elite Auto Detailing — home"
+          className="absolute left-4 top-1/2 -translate-y-1/2 sm:left-8 md:hidden"
+        >
+          <span
+            className={`inline-flex rounded-lg p-1.5 transition-colors duration-300 ${
+              scrolled ? "" : "bg-white/90"
+            }`}
+          >
+            <img
+              src="/img/logo-mark.png"
+              alt="C&H Elite Auto Detailing"
+              width={1000}
+              height={648}
+              className="h-8 w-auto"
+            />
+          </span>
+        </a>
 
         {/* Mobile hamburger */}
         <button
@@ -84,7 +107,7 @@ export function Navbar() {
           aria-label="Open menu"
           aria-expanded={open}
           onClick={() => setOpen(true)}
-          className={`absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center sm:right-8 md:hidden ${
+          className={`absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center sm:right-8 md:hidden ${
             scrolled ? "text-ink" : "text-canvas"
           }`}
         >
@@ -164,6 +187,7 @@ export function Navbar() {
                   slug={primaryBookingSlug}
                   variant="gold"
                   className="w-full"
+                  chooser
                 >
                   {hero.bookCta}
                 </BookButton>

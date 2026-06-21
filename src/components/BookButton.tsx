@@ -14,6 +14,11 @@ interface BookButtonProps {
   /** Pill height/padding. Set this rather than passing px-/py- in className —
    *  base padding utilities win unpredictably over className overrides. */
   size?: Size;
+  /** When true the click opens the three-service chooser instead of going
+   *  straight to `slug`'s calendar. Use this for the generic CTAs (nav, hero,
+   *  footer, final band); leave it off for a service-specific button. The
+   *  `slug` is still the no-JS / new-tab href fallback. */
+  chooser?: boolean;
   /** Layout-only extras: width, margins. No padding or colour utilities here. */
   className?: string;
 }
@@ -43,9 +48,10 @@ export function BookButton({
   children,
   variant = "ink",
   size = "default",
+  chooser = false,
   className = "",
 }: BookButtonProps) {
-  const { open } = useBooking();
+  const { open, openChooser } = useBooking();
   const href = bookingHref(slug);
 
   const base =
@@ -58,7 +64,8 @@ export function BookButton({
       onClick={(e) => {
         if (cal.enabled) {
           e.preventDefault();
-          open(slug);
+          if (chooser) openChooser();
+          else open(slug);
         }
       }}
       whileHover={{ y: -1 }}

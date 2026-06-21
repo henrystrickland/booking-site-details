@@ -41,6 +41,42 @@ export function bookingHref(slug: string): string {
  *  if you'd rather the generic buttons open a different event. */
 export const primaryBookingSlug = "interior-exterior";
 
+/* ── Booking chooser ────────────────────────────────────────────────────────
+   The generic "Book" buttons (nav, hero, footer, final CTA) don't jump straight
+   into one event anymore — they open a small chooser so the customer picks
+   which of the three details they want. Edit the copy/order here. */
+export interface BookingOption {
+  slug: string;
+  label: string;
+  blurb: string;
+  /** Appointment length, shown as a small meta tag. */
+  duration: string;
+  /** Optional emphasis tag, e.g. the most complete package. */
+  tag?: string;
+}
+
+export const bookingOptions: BookingOption[] = [
+  {
+    slug: "interior",
+    label: "Interior Detail",
+    blurb: "Seats, carpets, vents, and every surface deep-cleaned inside.",
+    duration: "90 min",
+  },
+  {
+    slug: "exterior",
+    label: "Exterior Detail",
+    blurb: "Hand wash, wheels, and tires for a sharp, clean finish.",
+    duration: "60 min",
+  },
+  {
+    slug: "interior-exterior",
+    label: "Full In & Out",
+    blurb: "The complete package — interior and exterior, top to bottom.",
+    duration: "180 min",
+    tag: "Most complete",
+  },
+];
+
 /* ── Brand ──────────────────────────────────────────────────────────────── */
 export const brand = {
   name: "C&H Elite Auto Detailing",

@@ -31,7 +31,7 @@ export function FinalCTA() {
             {finalCta.subline}
           </p>
           <div className="mt-9 flex justify-center">
-            <BookButton slug={primaryBookingSlug} variant="gold">
+            <BookButton slug={primaryBookingSlug} variant="gold" chooser>
               {finalCta.button}
             </BookButton>
           </div>

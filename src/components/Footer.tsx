@@ -56,7 +56,7 @@ export function Footer() {
 
             {/* CTA */}
             <div className="sm:pt-1">
-              <BookButton slug={primaryBookingSlug} variant="gold">
+              <BookButton slug={primaryBookingSlug} variant="gold" chooser>
                 Book a Detail
               </BookButton>
             </div>
