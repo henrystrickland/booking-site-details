@@ -5,7 +5,7 @@ import { SocialLinks } from "./SocialLinks";
 
 export function FinalCTA() {
   return (
-    <section id={sections.book} className="scroll-mt-20 px-6 pb-20 pt-20 sm:px-10 sm:pt-24">
+    <section id={sections.book} className="scroll-mt-20 px-6 pb-20 pt-0 sm:px-10">
       <div className="grain relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-ink px-8 py-16 text-center text-canvas sm:px-16 sm:py-20">
         {/* Foam-wash photo background. */}
         <img

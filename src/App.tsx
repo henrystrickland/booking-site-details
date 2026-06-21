@@ -7,6 +7,7 @@ import { HowItWorks } from "./components/HowItWorks";
 import { FinalCTA } from "./components/FinalCTA";
 import { Footer } from "./components/Footer";
 import { ScrollGate } from "./components/ScrollGate";
+import { BackToTop } from "./components/BackToTop";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
       </main>
       <ScrollGate />
       <Footer />
+      <BackToTop />
     </>
   );
 }

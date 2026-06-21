@@ -14,12 +14,21 @@
    While `enabled` is false, every Book button stays visible but points to a
    harmless in-page anchor (#book) so nothing breaks. Flip `enabled` to true
    and every button instantly routes to the real Cal.com event — no other
-   code changes needed. */
+   code changes needed.
+
+   ►► TO GO LIVE: change `enabled: false` to `enabled: true` on the line below.
+
+   The three real Cal.com events (cal.com/chautodetails/{slug}):
+     • interior            — Interior detail (90 min)
+     • exterior            — Exterior detail (60 min)
+     • interior-exterior   — Interior + Exterior, full detail (180 min)
+   These are not vehicle-specific; a sedan and an SUV book the same event and
+   the exact price is quoted in person. */
 export const cal = {
   /** Your Cal.com username. Final URL = https://cal.com/{username}/{slug} */
   username: "chautodetails",
   /** Set to TRUE to send every button to the live Cal.com booking pages. */
-  enabled: false,
+  enabled: true,
 } as const;
 
 /** Builds the destination for a Book button from a Cal.com event slug. */
@@ -28,8 +37,9 @@ export function bookingHref(slug: string): string {
 }
 
 /** The hero / nav / footer "Book a Detail" CTAs point at this event slug.
- *  Use a general booking/consultation Cal.com event here. */
-export const primaryBookingSlug = "book";
+ *  Defaults to the most complete package; change to "interior" or "exterior"
+ *  if you'd rather the generic buttons open a different event. */
+export const primaryBookingSlug = "interior-exterior";
 
 /* ── Brand ──────────────────────────────────────────────────────────────── */
 export const brand = {
@@ -37,7 +47,7 @@ export const brand = {
   shortName: "C&H Elite",
   serviceArea: "Northern Virginia",
   /** Small logo used in the navbar and footer. */
-  logoSrc: "/img/logo.png",
+  logoSrc: "/img/logo-mark.png",
   phone: "(703) 376-7536",
   phoneHref: "tel:7033767536",
   email: "chautodetails@gmail.com",
@@ -58,8 +68,11 @@ export const nav = [
    Place real files at these paths; placeholders render until you do. */
 export const hero = {
   videoSrc: "/video/hero.mp4",
-  posterSrc: "/img/hero-poster.jpg",
-  logoSrc: "/img/logo-hero.png",
+  // Instant first paint behind the video while it buffers — prevents the black
+  // flash. Replace with a still exported from the video's first frame for a
+  // seamless fade (save it at /img/hero-poster.jpg and point this back to it).
+  posterSrc: "/img/cta-foam.jpg",
+  logoSrc: "/img/logo-mark.png",
   // The two hero buttons. "Get Your Free Quote" calls the business; "Book a
   // Detail" routes to the Cal.com booking (the primaryBookingSlug above).
   quoteCta: "Get Your Free Quote",
@@ -114,21 +127,21 @@ export const serviceCategories: VehicleCategory[] = [
         description:
           "Seats, carpets, vents, and every surface deep-cleaned inside.",
         priceRange: "$75–$125",
-        slug: "sedan-interior",
+        slug: "interior",
       },
       {
         id: "sedan-exterior",
         name: "Exterior Detail",
         description: "Hand wash, wheels, and tires for a sharp, clean finish.",
         priceRange: "$50–$70",
-        slug: "sedan-exterior",
+        slug: "exterior",
       },
       {
         id: "sedan-full",
         name: "Full In & Out Clean",
         description: "The complete package — interior and exterior, top to bottom.",
         priceRange: "$125–$195",
-        slug: "sedan-full",
+        slug: "interior-exterior",
         tag: "Most complete",
       },
     ],
@@ -146,21 +159,21 @@ export const serviceCategories: VehicleCategory[] = [
         description:
           "Seats, carpets, vents, and every surface deep-cleaned inside.",
         priceRange: "$85–$135",
-        slug: "suv-interior",
+        slug: "interior",
       },
       {
         id: "suv-exterior",
         name: "Exterior Detail",
         description: "Hand wash, wheels, and tires for a sharp, clean finish.",
         priceRange: "$55–$75",
-        slug: "suv-exterior",
+        slug: "exterior",
       },
       {
         id: "suv-full",
         name: "Full In & Out Clean",
         description: "The complete package — interior and exterior, top to bottom.",
         priceRange: "$140–$210",
-        slug: "suv-full",
+        slug: "interior-exterior",
         tag: "Most complete",
       },
     ],

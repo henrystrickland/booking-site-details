@@ -96,32 +96,44 @@ function AddOnCard({ addOn }: { addOn: AddOn }) {
 
 function DiscountCard({ discount }: { discount: Discount }) {
   return (
-    <div className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-2xl bg-ink p-7 text-canvas shadow-[0_24px_50px_-30px_rgba(11,11,12,0.7)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_36px_70px_-30px_rgba(11,11,12,0.8)] sm:p-8">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-ink p-7 text-canvas shadow-[0_24px_50px_-30px_rgba(11,11,12,0.7)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_36px_70px_-30px_rgba(11,11,12,0.8)] sm:p-8">
       {/* Warm corner glow for depth. */}
-      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-accent/25 blur-2xl transition-opacity duration-300 group-hover:opacity-80" />
-      <div className="relative flex items-center justify-between gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-canvas/10 ring-1 ring-canvas/15">
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--color-accent)"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            {DISCOUNT_ICONS[discount.icon]}
-          </svg>
+      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-accent/25 blur-2xl transition-opacity duration-300 group-hover:opacity-90" />
+
+      {/* Icon */}
+      <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-canvas/10 ring-1 ring-canvas/15">
+        <svg
+          width="21"
+          height="21"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--color-accent)"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          {DISCOUNT_ICONS[discount.icon]}
+        </svg>
+      </span>
+
+      {/* The savings — the focal point. The minus + dollar sit inline at the
+          full numeral size so they read as one tight "−$10", not a low prefix. */}
+      <div className="relative mt-6 flex items-baseline">
+        <span className="font-display text-[3.25rem] leading-none tracking-tight text-accent sm:text-[4rem]">
+          −${discount.amount}
         </span>
-        <span className="font-display text-2xl text-accent">−${discount.amount}</span>
+        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent/70">
+          off
+        </span>
       </div>
-      <div className="relative">
-        <h3 className="font-display text-xl tracking-tight text-canvas">
+
+      {/* Name + description. */}
+      <div className="relative mt-6">
+        <h3 className="font-display text-lg tracking-tight text-canvas">
           {discount.name}
         </h3>
-        <p className="mt-2 text-[15px] leading-relaxed text-canvas/65">
+        <p className="mt-2 text-[14px] leading-relaxed text-canvas/65">
           {discount.description}
         </p>
       </div>
@@ -165,7 +177,7 @@ export function AddOns() {
             <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.25em] text-accent-deep">
               Discounts
             </p>
-            <h3 className="font-display text-[clamp(2rem,4.5vw,3rem)] text-ink">
+            <h3 className="font-display text-[clamp(2.5rem,5.5vw,3.875rem)] text-ink">
               Ways to <span className="font-serif font-light italic">save.</span>
             </h3>
             <p className="mt-5 text-lg leading-relaxed text-ink-soft">

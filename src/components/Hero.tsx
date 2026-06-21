@@ -3,30 +3,34 @@ import { motion, useReducedMotion } from "framer-motion";
 import { brand, hero, primaryBookingSlug } from "../content/site";
 import { BookButton } from "./BookButton";
 
+type NetworkInformation = { saveData?: boolean; effectiveType?: string };
+
 export function Hero() {
   const reduce = useReducedMotion();
-  const [mountVideo, setMountVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [allowVideo, setAllowVideo] = useState(false);
 
-  // Lazy-load the (assumed heavy) video AFTER first paint, and never when the
-  // user prefers reduced motion — the poster is always the instant fallback.
+  // Decide once whether to load the (heavy) hero video. We skip it for
+  // reduced-motion users and on data-saver / very slow (2G) connections, where
+  // the instant poster is the better, cheaper experience. Browsers without the
+  // Network Information API report nothing, so they default to playing it.
   useEffect(() => {
-    if (reduce) return;
-    const idle =
-      window.requestIdleCallback?.(() => setMountVideo(true)) ??
-      window.setTimeout(() => setMountVideo(true), 200);
-    return () => {
-      if (typeof window.cancelIdleCallback === "function") {
-        window.cancelIdleCallback(idle as number);
-      } else {
-        clearTimeout(idle as number);
-      }
-    };
+    if (reduce) {
+      setAllowVideo(false);
+      return;
+    }
+    const conn = (navigator as Navigator & { connection?: NetworkInformation })
+      .connection;
+    const constrained =
+      conn?.saveData === true || /(^|-)2g$/.test(conn?.effectiveType ?? "");
+    setAllowVideo(!constrained);
   }, [reduce]);
 
+  // Nudge playback for browsers that don't honour the autoPlay attribute. The
+  // poster image is the instant, never-black first paint while the video buffers.
   useEffect(() => {
-    if (mountVideo) videoRef.current?.play().catch(() => {});
-  }, [mountVideo]);
+    if (allowVideo) videoRef.current?.play().catch(() => {});
+  }, [allowVideo]);
 
   return (
     <section
@@ -43,17 +47,19 @@ export function Hero() {
         }}
       />
 
-      {/* Lazy video layer. */}
-      {mountVideo && (
+      {/* Video layer — mounted as soon as the connection check passes, and
+          preloaded so it starts playing quickly. Fades in over the poster
+          (no black). Skipped on reduced-motion / data-saver / 2G. */}
+      {allowVideo && (
         <video
           ref={videoRef}
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-0 transition-opacity duration-700"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-0 transition-opacity duration-500"
           poster={hero.posterSrc}
           muted
           loop
           autoPlay
           playsInline
-          preload="none"
+          preload="auto"
           onCanPlay={(e) => (e.currentTarget.style.opacity = "1")}
         >
           <source src={hero.videoSrc} type="video/mp4" />
@@ -63,33 +69,21 @@ export function Hero() {
       {/* Readability gradient between media and content. */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/55 via-ink/25 to-ink/80" />
 
-      {/* A very slight, clean warm glow behind the logo — minimal, just enough
-          to lift it off the dark background. */}
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-[44%] -z-10 h-[58vmin] w-[92vmin] -translate-x-1/2 -translate-y-1/2"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(231,201,156,0.18) 0%, rgba(168,134,94,0.06) 46%, rgba(11,11,12,0) 76%)",
-        }}
-        initial={reduce ? false : { opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-      />
-
       {/* Centerpiece — the logo + the two actions. */}
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-24 pt-24 text-center">
-        {/* Glow lives on a static wrapper so the entrance blur animation on the
-            image never overrides the drop-shadow. */}
-        <div className="logo-glow w-[56vw] max-w-[360px]">
+        {/* The mark is black line art; the wrapper's brightness-0 + invert
+            renders it crisp white over the dark hero/video — no glow needed.
+            The invert lives on the wrapper so the image's animated blur filter
+            never overrides it. */}
+        <div className="w-[64vw] max-w-[420px] brightness-0 invert">
           <motion.img
             src={hero.logoSrc}
             alt="C&H Elite Auto Detailing"
             // Intrinsic size reserves the aspect ratio (no layout shift) and the
-            // 1565px source stays far above the rendered size, so it renders
+            // 2000px source stays far above the rendered size, so it renders
             // pin-sharp on any display. It's the hero focal point → fetch first.
-            width={1565}
-            height={1017}
+            width={2000}
+            height={1295}
             fetchPriority="high"
             decoding="async"
             draggable={false}

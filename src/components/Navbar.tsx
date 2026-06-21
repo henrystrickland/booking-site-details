@@ -117,11 +117,17 @@ export function Navbar() {
             transition={{ duration: 0.25 }}
           >
             <div className="flex items-center justify-between px-6 py-3">
-              <img
-                src="/img/logo.png"
-                alt="C&H Elite Auto Detailing"
-                className="h-10 w-auto brightness-0 invert"
-              />
+              {/* Original (black) mark on a white rounded chip — keeps its true
+                  colours and stays legible on the dark menu overlay. */}
+              <span className="inline-flex rounded-xl bg-white p-2.5">
+                <img
+                  src="/img/logo-mark.png"
+                  alt="C&H Elite Auto Detailing"
+                  width={1000}
+                  height={648}
+                  className="h-9 w-auto"
+                />
+              </span>
               <button
                 type="button"
                 aria-label="Close menu"

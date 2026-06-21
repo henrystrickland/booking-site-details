@@ -13,10 +13,14 @@ export function Footer() {
           <div className="grid gap-8 sm:grid-cols-[1.5fr_1fr_1.3fr_auto] sm:items-start sm:gap-10">
             {/* Brand */}
             <div>
+              {/* Plain black mark with a soft orange glow so it pops and stays
+                  legible on the dark footer — no chip. */}
               <img
-                src="/img/logo.png"
+                src={brand.logoSrc}
                 alt={brand.name}
-                className="h-12 w-auto brightness-0 invert"
+                width={1000}
+                height={648}
+                className="h-14 w-auto [filter:drop-shadow(0_0_3px_rgba(231,150,80,0.85))_drop-shadow(0_0_10px_rgba(221,122,48,0.45))_drop-shadow(0_0_22px_rgba(221,122,48,0.22))]"
               />
               <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-canvas/60">
                 Premium mobile detailing across {brand.serviceArea}. We come to you.

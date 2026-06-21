@@ -136,10 +136,7 @@ export function Services() {
               </div>
 
               <div className={i % 2 === 1 ? "lg:order-1" : ""}>
-                <span className="font-display text-sm tracking-[0.25em] text-accent-deep/70">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="font-display mt-2 text-[clamp(2rem,4vw,2.875rem)] text-ink">
+                <h3 className="font-display text-[clamp(2rem,4vw,2.875rem)] text-ink">
                   {category.label}
                 </h3>
                 <p className="mt-2.5 text-base text-ink-faint">{category.blurb}</p>
