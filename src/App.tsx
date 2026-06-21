@@ -9,9 +9,11 @@ import { Footer } from "./components/Footer";
 import { ScrollGate } from "./components/ScrollGate";
 import { BackToTop } from "./components/BackToTop";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
+import { useCalEmbed } from "./hooks/useCalEmbed";
 
 export default function App() {
   useSmoothScroll();
+  useCalEmbed();
 
   return (
     <>

@@ -44,7 +44,10 @@ export function BookButton({
   className = "",
 }: BookButtonProps) {
   const href = bookingHref(slug);
-  const external = cal.enabled;
+  // When booking is live, open the Cal.com popup (via data-cal-link) instead of
+  // a new tab. The href stays the real Cal URL as a graceful fallback if the
+  // embed script hasn't loaded yet; when disabled it's the inert #book anchor.
+  const calLink = cal.enabled ? `${cal.username}/${slug}` : undefined;
 
   const base =
     "group inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-tight transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
@@ -52,8 +55,9 @@ export function BookButton({
   return (
     <motion.a
       href={href}
-      target={external ? "_blank" : undefined}
-      rel={external ? "noopener noreferrer" : undefined}
+      data-cal-link={calLink}
+      data-cal-namespace={calLink ? "booking" : undefined}
+      rel={calLink ? "noopener" : undefined}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
