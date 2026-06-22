@@ -1,16 +1,19 @@
 import { brand } from "../content/site";
 
+// Matched solid glyphs — identical to the hero's set so the brand reads the
+// same everywhere. Instagram is a solid camera (lens + flash punched out via
+// even-odd fill); Facebook is the bold "f" letterform only.
 const InstagramIcon = (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <rect x="2" y="2" width="20" height="20" rx="5" />
-    <circle cx="12" cy="12" r="4" />
-    <path d="M17.5 6.5h.01" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path fillRule="evenodd" clipRule="evenodd" d="M8 2 H16 A6 6 0 0 1 22 8 V16 A6 6 0 0 1 16 22 H8 A6 6 0 0 1 2 16 V8 A6 6 0 0 1 8 2 Z M12 7.4 a4.6 4.6 0 1 0 0 9.2 a4.6 4.6 0 1 0 0 -9.2 Z M17 5.7 a1.15 1.15 0 1 0 0 2.3 a1.15 1.15 0 1 0 0 -2.3 Z" />
   </svg>
 );
 
 const FacebookIcon = (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <g transform="translate(6.4 3) scale(0.0352)">
+      <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
+    </g>
   </svg>
 );
 

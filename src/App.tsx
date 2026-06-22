@@ -6,7 +6,6 @@ import { AddOns } from "./components/AddOns";
 import { HowItWorks } from "./components/HowItWorks";
 import { FinalCTA } from "./components/FinalCTA";
 import { Footer } from "./components/Footer";
-import { ScrollGate } from "./components/ScrollGate";
 import { BackToTop } from "./components/BackToTop";
 import { BookingProvider } from "./components/BookingModal";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
@@ -25,7 +24,6 @@ export default function App() {
         <HowItWorks />
         <FinalCTA />
       </main>
-      <ScrollGate />
       <Footer />
       <BackToTop />
     </BookingProvider>

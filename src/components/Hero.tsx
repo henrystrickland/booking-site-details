@@ -133,6 +133,51 @@ export function Hero() {
             {hero.bookCta}
           </BookButton>
         </motion.div>
+
+        {/* Social — matched solid glyphs in outlined circles (like the quote
+            button). At rest they're a quiet white; on hover each circle fills
+            with its own brand colour — the gradient/blue fades in (so it
+            animates, which a CSS gradient alone can't), the icon brightens, the
+            button lifts, and a soft brand-tinted glow drops beneath. */}
+        <motion.div
+          className="mt-7 flex items-center justify-center gap-3.5"
+          initial={reduce ? false : { opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.65, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <a
+            href={brand.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="group relative inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full text-canvas/85 shadow-[inset_0_0_0_1px_rgba(246,244,239,0.3)] transition-[color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:text-white hover:shadow-[0_12px_28px_-8px_rgba(214,41,118,0.6)]"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full bg-[linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            />
+            <svg className="relative" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path fillRule="evenodd" clipRule="evenodd" d="M8 2 H16 A6 6 0 0 1 22 8 V16 A6 6 0 0 1 16 22 H8 A6 6 0 0 1 2 16 V8 A6 6 0 0 1 8 2 Z M12 7.4 a4.6 4.6 0 1 0 0 9.2 a4.6 4.6 0 1 0 0 -9.2 Z M17 5.7 a1.15 1.15 0 1 0 0 2.3 a1.15 1.15 0 1 0 0 -2.3 Z" />
+            </svg>
+          </a>
+          <a
+            href={brand.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+            className="group relative inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full text-canvas/85 shadow-[inset_0_0_0_1px_rgba(246,244,239,0.3)] transition-[color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:text-white hover:shadow-[0_12px_28px_-8px_rgba(24,119,242,0.6)]"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full bg-[#1877F2] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            />
+            <svg className="relative" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <g transform="translate(6.4 3) scale(0.0352)">
+                <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
+              </g>
+            </svg>
+          </a>
+        </motion.div>
       </div>
     </section>
   );

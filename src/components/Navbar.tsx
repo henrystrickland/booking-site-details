@@ -1,50 +1,69 @@
 import { useEffect, useState } from "react";
 import {
-  AnimatePresence,
   motion,
+  useMotionValueEvent,
   useReducedMotion,
   useScroll,
   useSpring,
+  useTransform,
 } from "framer-motion";
-import { hero, nav, primaryBookingSlug } from "../content/site";
+import { nav, primaryBookingSlug } from "../content/site";
 import { BookButton } from "./BookButton";
 
 export function Navbar() {
   const reduce = useReducedMotion();
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  // The section currently in view — its nav word is highlighted. Empty while
+  // the hero is on screen (no section yet).
+  const [active, setActive] = useState("");
+
+  const { scrollY, scrollYProgress } = useScroll();
+
+  // The frosted bar doesn't pop in at a threshold — its opacity is mapped
+  // continuously to the first ~80px of scroll, so it (and its hairline) ease in
+  // as you leave the hero rather than flashing on with the letters.
+  const glass = useTransform(scrollY, [4, 84], [0, 1]);
 
   // Smooth scroll-progress for the hairline indicator. The spring keeps the
   // fill gliding rather than snapping frame-to-frame; transforms only scaleX
   // (GPU), so it adds no scroll cost.
-  const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, {
     stiffness: 120,
     damping: 30,
     mass: 0.4,
   });
 
-  useEffect(() => {
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setScrolled(window.scrollY > 24));
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
+  // The link/CTA colour flips once the glass is roughly half-in, cross-fading
+  // over 300ms so it reads as part of the same settle, not a separate snap.
+  useMotionValueEvent(scrollY, "change", (v) => {
+    const next = v > 44;
+    setScrolled((prev) => (prev === next ? prev : next));
+  });
 
-  // Lock body scroll while the mobile menu is open.
+  // Scroll-spy: highlight the nav word for whichever section is crossing the
+  // middle of the viewport. The thin rootMargin band makes exactly one section
+  // "current" at a time, so the highlight shifts cleanly from word to word as
+  // you scroll — on mobile and desktop alike.
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+    const ids = nav.map((item) => item.href.replace("#", ""));
+    const inBand = new Set<string>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) inBand.add(entry.target.id);
+          else inBand.delete(entry.target.id);
+        }
+        const current = ids.find((id) => inBand.has(id));
+        if (current) setActive(current);
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const linkColor = scrolled ? "text-ink-soft hover:text-ink" : "text-canvas/80 hover:text-canvas";
 
@@ -53,127 +72,67 @@ export function Navbar() {
       initial={reduce ? false : { y: -24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-300 ${
-        scrolled ? "glass-nav" : "border-b border-transparent bg-transparent"
-      }`}
+      className="fixed inset-x-0 top-0 z-50"
     >
-      <nav className="relative mx-auto flex min-h-[64px] max-w-6xl items-center justify-center px-6 py-3.5 sm:px-10 md:min-h-0">
-        {/* Desktop links + CTA, centered as one cluster */}
-        <div className="hidden items-center gap-9 md:flex">
-          {nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`text-[17px] font-semibold tracking-tight transition-colors duration-200 ${linkColor}`}
-            >
-              {item.label}
-            </a>
-          ))}
-          <BookButton
-            slug={primaryBookingSlug}
-            variant={scrolled ? "ink" : "gold"}
-            size="slim"
-            chooser
-          >
-            Book
-          </BookButton>
-        </div>
+      {/* Frosted-glass layer — its opacity rides the scroll position, so the
+          bar eases in gradually instead of snapping on. Sits behind the links. */}
+      <motion.div
+        aria-hidden="true"
+        className="glass-nav absolute inset-0"
+        style={{ opacity: reduce ? (scrolled ? 1 : 0) : glass }}
+      />
 
-        {/* Mobile hamburger */}
-        <button
-          type="button"
-          aria-label="Open menu"
-          aria-expanded={open}
-          onClick={() => setOpen(true)}
-          className={`absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center sm:right-8 md:hidden ${
-            scrolled ? "text-ink" : "text-canvas"
-          }`}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <path d="M3 6h18M3 12h18M3 18h18" />
-          </svg>
-        </button>
+      <nav className="relative mx-auto flex min-h-[58px] max-w-6xl items-center justify-center px-4 py-3 sm:min-h-0 sm:px-10 sm:py-3.5">
+        <div className="flex items-center gap-5 sm:gap-9">
+          {nav.map((item) => {
+            const isActive = active === item.href.replace("#", "");
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`relative text-[15px] font-semibold tracking-tight transition-colors duration-300 sm:text-[17px] ${
+                  isActive ? "text-accent" : linkColor
+                }`}
+              >
+                {item.label}
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-active"
+                    className="absolute -bottom-1 left-0 right-0 h-[2px] rounded-full bg-accent"
+                    transition={
+                      reduce
+                        ? { duration: 0 }
+                        : { type: "spring", stiffness: 420, damping: 34 }
+                    }
+                  />
+                )}
+              </a>
+            );
+          })}
+          {/* Book stays a desktop-only CTA so the three section links fit
+              comfortably across small phones. */}
+          <span className="hidden md:inline-flex">
+            <BookButton
+              slug={primaryBookingSlug}
+              variant={scrolled ? "ink" : "gold"}
+              size="slim"
+              chooser
+            >
+              Book
+            </BookButton>
+          </span>
+        </div>
       </nav>
 
-      {/* Scroll-progress hairline — only once the bar is solid, so it never
-          floats over the transparent hero. */}
+      {/* Scroll-progress hairline — its opacity rides the same glass fade so it
+          eases in with the bar instead of floating over the transparent hero. */}
       {!reduce && (
         <motion.div
           aria-hidden="true"
-          className={`absolute bottom-0 left-0 h-[3px] w-full origin-left bg-accent transition-opacity duration-300 ${
-            scrolled ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ scaleX: progress }}
+          className="absolute bottom-0 left-0 h-[3px] w-full origin-left bg-accent"
+          style={{ scaleX: progress, opacity: glass }}
         />
       )}
-
-      {/* Mobile overlay menu */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed inset-0 z-50 bg-ink text-canvas md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            <div className="flex items-center justify-between px-6 py-3">
-              {/* Original (black) mark on a white rounded chip — keeps its true
-                  colours and stays legible on the dark menu overlay. */}
-              <span className="inline-flex rounded-xl bg-white p-2.5">
-                <img
-                  src="/img/logo-mark.png"
-                  alt="C&H Elite Auto Detailing"
-                  width={1000}
-                  height={648}
-                  className="h-9 w-auto"
-                />
-              </span>
-              <button
-                type="button"
-                aria-label="Close menu"
-                onClick={() => setOpen(false)}
-                className="flex h-10 w-10 items-center justify-center text-canvas"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M18 6 6 18M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-2 px-6 pt-10">
-              {nav.map((item, i) => (
-                <motion.a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="font-display border-b border-canvas/10 py-5 text-4xl tracking-tight text-canvas"
-                  initial={reduce ? false : { opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.08 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {item.label}
-                </motion.a>
-              ))}
-              <motion.div
-                className="mt-8"
-                initial={reduce ? false : { opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.32 }}
-              >
-                <BookButton
-                  slug={primaryBookingSlug}
-                  variant="gold"
-                  className="w-full"
-                  chooser
-                >
-                  {hero.bookCta}
-                </BookButton>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.header>
   );
 }

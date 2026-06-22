@@ -7,7 +7,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="grain relative overflow-hidden bg-ink px-6 py-12 text-canvas sm:px-10">
+    <footer className="grain relative overflow-hidden bg-ink px-6 pb-24 pt-12 text-canvas sm:px-10 sm:pb-12">
       <div className="mx-auto max-w-6xl">
         <Reveal>
           <div className="grid gap-8 sm:grid-cols-[1.5fr_1fr_1.3fr_auto] sm:items-start sm:gap-10">
