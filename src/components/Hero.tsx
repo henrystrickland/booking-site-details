@@ -26,10 +26,31 @@ export function Hero() {
     setAllowVideo(!constrained);
   }, [reduce]);
 
-  // Nudge playback for browsers that don't honour the autoPlay attribute. The
-  // poster image is the instant, never-black first paint while the video buffers.
+  // Make mobile autoplay actually happen. iOS/Android only autoplay a video
+  // they can *see* is muted+inline — and React's `muted` prop notoriously fails
+  // to set the underlying DOM attribute, so the browser treats it as audible
+  // and blocks autoplay (you get a poster + a play button instead). We set those
+  // properties imperatively and kick play() — retrying once the data loads,
+  // since the first attempt can land before the element is ready.
   useEffect(() => {
-    if (allowVideo) videoRef.current?.play().catch(() => {});
+    const v = videoRef.current;
+    if (!allowVideo || !v) return;
+
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.playsInline = true;
+
+    const tryPlay = () => {
+      v.play().catch(() => {});
+    };
+    tryPlay();
+    v.addEventListener("loadeddata", tryPlay);
+    v.addEventListener("canplay", tryPlay);
+    return () => {
+      v.removeEventListener("loadeddata", tryPlay);
+      v.removeEventListener("canplay", tryPlay);
+    };
   }, [allowVideo]);
 
   return (
@@ -54,13 +75,15 @@ export function Hero() {
         <video
           ref={videoRef}
           className="absolute inset-0 -z-10 h-full w-full object-cover opacity-0 transition-opacity duration-500"
-          poster={hero.posterSrc}
           muted
           loop
           autoPlay
           playsInline
           preload="auto"
-          onCanPlay={(e) => (e.currentTarget.style.opacity = "1")}
+          // Only reveal once it's genuinely playing. If a browser blocks
+          // autoplay outright, the element stays invisible and the background
+          // poster shows cleanly — no paused frame, no stray play button.
+          onPlaying={(e) => (e.currentTarget.style.opacity = "1")}
         >
           <source src={hero.videoSrc} type="video/mp4" />
         </video>
