@@ -79,28 +79,6 @@ export function Navbar() {
           </BookButton>
         </div>
 
-        {/* Mobile logo — gives the bar real height and branding (the bar would
-            otherwise collapse to just padding around the floating hamburger). */}
-        <a
-          href="#top"
-          aria-label="C&H Elite Auto Detailing — home"
-          className="absolute left-4 top-1/2 -translate-y-1/2 sm:left-8 md:hidden"
-        >
-          <span
-            className={`inline-flex rounded-lg p-1.5 transition-colors duration-300 ${
-              scrolled ? "" : "bg-white/90"
-            }`}
-          >
-            <img
-              src="/img/logo-mark.png"
-              alt="C&H Elite Auto Detailing"
-              width={1000}
-              height={648}
-              className="h-8 w-auto"
-            />
-          </span>
-        </a>
-
         {/* Mobile hamburger */}
         <button
           type="button"

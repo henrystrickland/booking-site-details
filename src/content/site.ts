@@ -59,7 +59,7 @@ export const bookingOptions: BookingOption[] = [
   {
     slug: "interior",
     label: "Interior Detail",
-    blurb: "Seats, carpets, vents, and every surface deep-cleaned inside.",
+    blurb: "A deep clean inside — seats, carpets, vents, and every surface.",
     duration: "90 min",
   },
   {
@@ -161,7 +161,7 @@ export const serviceCategories: VehicleCategory[] = [
         id: "sedan-interior",
         name: "Interior Detail",
         description:
-          "Seats, carpets, vents, and every surface deep-cleaned inside.",
+          "A deep clean inside — seats, carpets, vents, and every surface.",
         priceRange: "$75–$125",
         slug: "interior",
       },
@@ -193,7 +193,7 @@ export const serviceCategories: VehicleCategory[] = [
         id: "suv-interior",
         name: "Interior Detail",
         description:
-          "Seats, carpets, vents, and every surface deep-cleaned inside.",
+          "A deep clean inside — seats, carpets, vents, and every surface.",
         priceRange: "$85–$135",
         slug: "interior",
       },
