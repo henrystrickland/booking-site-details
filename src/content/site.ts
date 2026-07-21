@@ -251,7 +251,7 @@ export const addOns: AddOn[] = [
     id: "hydrophobic-sealant",
     name: "Hydrophobic Sealant",
     description: "A protective coating that repels water and boosts the shine.",
-    price: 30,
+    price: 20,
     icon: "sealant",
   },
   {
